@@ -175,40 +175,28 @@
             }
         
             // Zapisanie zamówienia w Firebase
-            db.collection("orders").add({
-                name: name,
-                email: email,
-                phone: phone, // Opcjonalny numer telefonu
-                paymentMethod: method,
-                shippingMethod: shippingMethod.value,
-                totalAmount: totalAmount,
-                orderDate: new Date().toISOString()
-            })
-            .then(function() {
-                alert("Zamówienie zostało zapisane!");
-        
-                // Przykładowe przekierowanie (link do Tipply jako test)
-                if (method === 'tipply') {
-                    const tipplyLink = 'https://tipply.pl/@mrkudlaty/?amount=' + totalAmount.toFixed(2) + '&desc=SCYLLA%20EP';
-                    window.location.href = tipplyLink;
-                } else if (method === 'paypal') {
-                    const paypalLink = 'https://www.paypal.com/cgi-bin/webscr?cmd=_xclick&business=mrkudlaty2006@gmail.com&item_name=SCYLLA%20EP&amount=' + totalAmount.toFixed(2) + '&currency_code=PLN';
-                    window.location.href = paypalLink;
-                }
-            })
-            .catch(function(error) {
-                console.error("Błąd podczas zapisywania zamówienia: ", error);
-            });
-        });
+      db.collection("orders").add(orderData)
+    .then(() => {
+        alert("Zamówienie zostało złożone!");
+        // Przekierowanie do płatności
+        if (paymentMethod.value === 'tipply') {
+            const tipplyLink = 'https://tipply.pl/@mrkudlaty/?amount=25.00&desc=SCYLLA%20EP';
+            window.location.href = tipplyLink;
+        } else if (paymentMethod.value === 'paypal') {
+            const paypalLink = 'https://www.paypal.com/cgi-bin/webscr?cmd=_xclick&business=your-paypal-email&item_name=SCYLLA%20EP&amount=25.00&currency_code=PLN';
+            window.location.href = paypalLink;
+        }
+    })
+    .catch((error) => {
+        console.error("Błąd przy składaniu zamówienia: ", error);
+        alert("Wystąpił błąd przy składaniu zamówienia.");
+    });
+});
         </script>
 
-<script type="module">
-    // Import the functions you need from the SDKs you need
-    import { initializeApp } from "https://www.gstatic.com/firebasejs/10.13.2/firebase-app.js";
-    import { getAnalytics } from "https://www.gstatic.com/firebasejs/10.13.2/firebase-analytics.js";
-    // TODO: Add SDKs for Firebase products that you want to use
-    // https://firebase.google.com/docs/web/setup#available-libraries
-  
+<script src="https://www.gstatic.com/firebasejs/10.13.2/firebase-app.js"></script>
+<script src="https://www.gstatic.com/firebasejs/10.13.2/firebase-analytics.js"></script>
+  <script>
     // Your web app's Firebase configuration
     // For Firebase JS SDK v7.20.0 and later, measurementId is optional
     const firebaseConfig = {
