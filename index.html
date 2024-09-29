@@ -1,0 +1,183 @@
+<!DOCTYPE html>
+<html lang="pl">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Kup Płytę - SCYLLA EP</title>
+    <link rel="stylesheet" href="style.css">
+    <style> 
+        body {
+            font-family: Arial, sans-serif;
+            background-color: #ffffff;
+            margin: 0;
+            padding: 0;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            height: 100vh;
+        }
+        
+        .container {
+            display: flex;
+            background-color: rgb(255, 255, 255);
+            border-radius: 10px;
+            padding: 20px;
+            box-shadow: 0 0 10px rgba(0,0,0,0.1);
+            max-width: 800px;
+            width: 100%;
+        }
+        
+        .album-info {
+            flex: 1;
+            margin-right: 20px;
+            text-align: left;
+        }
+        
+        .album-cover img {
+            width: 100%;
+            border-radius: 10px;
+        }
+        
+        h1 {
+            color: #333;
+            margin-bottom: 20px;
+            text-align: center;
+            flex-basis: 100%;
+        }
+
+        .purchase-form {
+            flex: 1;
+            text-align: center;
+            margin-left: 20px;
+        }
+
+        .purchase-form label {
+            display: block; /* Ustaw etykiety jako blokowe dla pozostałych */
+            text-align: left;
+            margin: 10px 0; /* Dodaj margines górny i dolny dla etykiet */
+        }
+
+        .purchase-form input[type="text"],
+        .purchase-form input[type="email"],
+        .purchase-form input[type="tel"] {
+            width: 100%; /* Ustaw szerokość na 100% */
+            padding: 10px;
+            margin-bottom: 15px;
+            border: 1px solid #ccc;
+            border-radius: 5px;
+        }
+
+        .option-container {
+            display: flex;
+            align-items: center; /* Wyrównanie w pionie */
+            margin-bottom: 10px; /* Odstęp między opcjami */
+            text-align: left; /* Wyjustuj tekst w lewo */
+        }
+
+        .buy-btn {
+            width: 100%;
+            padding: 10px;
+            background-color: #28a745;
+            color: white;
+            border: none;
+            border-radius: 5px;
+            cursor: pointer;
+            font-size: 16px;
+        }
+        
+        .buy-btn:hover {
+            background-color: #218838;
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <div class="album-info">
+            <h1>Kup płytę "SCYLLA EP"</h1>
+            <div class="album-cover">
+                <img src="scylla.jpg" alt="SCYLLA EP">
+            </div>
+            <p><strong>Artysta:</strong> MrKudłaty & SzczepAn</p>
+            <p><strong>Cena:</strong> 29.99 PLN</p>
+        </div>
+
+        <div class="purchase-form">
+            <h2>Dane do zakupu</h2>
+            <label for="name">Imię i nazwisko:</label>
+            <input type="text" id="name" name="name" required>
+
+            <label for="email">Adres e-mail:</label>
+            <input type="email" id="email" name="email" required>
+
+            <label for="phone">Numer telefonu (opcjonalnie):</label>
+            <input type="tel" id="phone" name="phone">
+
+            <h3>Wybierz metodę płatności:</h3>
+            <div class="option-container">
+                <input type="radio" id="tipply" name="payment_method" value="tipply" required>
+                <label for="tipply">Tipply</label>
+            </div>
+            <div class="option-container">
+                <input type="radio" id="paypal" name="payment_method" value="paypal" required>
+                <label for="paypal">PayPal</label>
+            </div>
+
+            <h3>Opcja dostawy:</h3>
+            <div class="option-container">
+                <input type="radio" id="standard" name="shipping" value="standard">
+                <label for="standard">Paczkomat InPost (11.99 PLN)</label>
+            </div>
+            <div class="option-container">
+                <input type="radio" id="express" name="shipping" value="express">
+                <label for="express">Kurier InPost (14.99 PLN)</label>
+            </div>
+            <div class="option-container">
+                <input type="radio" id="pickup" name="shipping" value="pickup">
+                <label for="pickup">Odbiór osobisty (0 PLN)</label>
+            </div>
+
+            <button id="pay-now" type="button" class="buy-btn">Kup Teraz</button>
+        </div>
+    </div>
+
+    <script>
+        document.getElementById('pay-now').addEventListener('click', function() {
+            const name = document.getElementById('name').value.trim();
+            const email = document.getElementById('email').value.trim();
+            const phone = document.getElementById('phone').value.trim(); // Dodano numer telefonu
+            const paymentMethod = document.querySelector('input[name="payment_method"]:checked');
+            const shippingMethod = document.querySelector('input[name="shipping"]:checked');
+
+            // Sprawdzanie, czy imię i nazwisko oraz adres e-mail są podane
+            if (!name || !email) {
+                alert("Proszę uzupełnić imię i nazwisko oraz adres e-mail.");
+                return; // Zakończ działanie funkcji, jeśli dane są niepełne
+            }
+
+            if (!paymentMethod) {
+                alert("Proszę wybrać metodę płatności.");
+                return; // Zakończ działanie funkcji, jeśli nie wybrano metody
+            }
+
+            const method = paymentMethod.value;
+
+            // Oblicz całkowity koszt na podstawie metody dostawy
+            let totalAmount = 25; // Cena płyty
+            if (shippingMethod.value === 'standard') {
+                totalAmount += 5; // Koszt dostawy standardowej
+            } else if (shippingMethod.value === 'express') {
+                totalAmount += 15; // Koszt dostawy ekspresowej
+            }
+
+            // Przykładowe przekierowanie (link do Tipply jako test)
+            if (method === 'tipply') {
+                const tipplyLink = 'https://tipply.pl/@mrkudlaty/?amount=' + totalAmount.toFixed(2) + '&desc=SCYLLA%20EP';
+                window.location.href = tipplyLink; // Przekieruj do Tipply
+            } else if (method === 'paypal') {
+                const paypalLink = 'https://www.paypal.com/cgi-bin/webscr?cmd=_xclick&business=mrkudlaty2006@gmail.com&item_name=SCYLLA%20EP&amount=' + totalAmount.toFixed(2) + '&currency_code=PLN';
+                window.location.href = paypalLink; // Przekieruj do PayPal
+            }
+        });
+    </script>
+</body>
+</html>
