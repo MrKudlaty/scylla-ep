@@ -162,11 +162,11 @@
             const method = paymentMethod.value;
 
             // Oblicz całkowity koszt na podstawie metody dostawy
-            let totalAmount = 25; // Cena płyty
+            let totalAmount = 29.99; // Cena płyty
             if (shippingMethod.value === 'standard') {
-                totalAmount += 5; // Koszt dostawy standardowej
+                totalAmount += 11.99; // Koszt dostawy paczkomat
             } else if (shippingMethod.value === 'express') {
-                totalAmount += 15; // Koszt dostawy ekspresowej
+                totalAmount += 14.99; // Koszt dostawy kurier
             }
 
             // Przykładowe przekierowanie (link do Tipply jako test)
