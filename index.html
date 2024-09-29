@@ -4,8 +4,7 @@
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Kup Płytę - SCYLLA EP</title>
-    <link rel="stylesheet" href="style.css">
-    <style> 
+    <style>
         body {
             font-family: Arial, sans-serif;
             background-color: #ffffff;
@@ -16,28 +15,28 @@
             align-items: center;
             height: 100vh;
         }
-        
+
         .container {
             display: flex;
             background-color: rgb(255, 255, 255);
             border-radius: 10px;
             padding: 20px;
-            box-shadow: 0 0 10px rgba(0,0,0,0.1);
+            box-shadow: 0 0 10px rgba(0, 0, 0, 0.1);
             max-width: 800px;
             width: 100%;
         }
-        
+
         .album-info {
             flex: 1;
             margin-right: 20px;
             text-align: left;
         }
-        
+
         .album-cover img {
             width: 100%;
             border-radius: 10px;
         }
-        
+
         h1 {
             color: #333;
             margin-bottom: 20px;
@@ -52,26 +51,20 @@
         }
 
         .purchase-form label {
-            display: block; /* Ustaw etykiety jako blokowe dla pozostałych */
             text-align: left;
-            margin: 10px 0; /* Dodaj margines górny i dolny dla etykiet */
+            display: inline-block;
         }
 
-        .purchase-form input[type="text"],
-        .purchase-form input[type="email"],
-        .purchase-form input[type="tel"] {
-            width: 100%; /* Ustaw szerokość na 100% */
+        .purchase-form input {
+            width: 100%;
             padding: 10px;
             margin-bottom: 15px;
             border: 1px solid #ccc;
             border-radius: 5px;
         }
 
-        .option-container {
-            display: flex;
-            align-items: center; /* Wyrównanie w pionie */
-            margin-bottom: 10px; /* Odstęp między opcjami */
-            text-align: left; /* Wyjustuj tekst w lewo */
+        .radio-label {
+            margin-right: 10px;
         }
 
         .buy-btn {
@@ -84,7 +77,7 @@
             cursor: pointer;
             font-size: 16px;
         }
-        
+
         .buy-btn:hover {
             background-color: #218838;
         }
@@ -113,105 +106,89 @@
             <input type="tel" id="phone" name="phone">
 
             <h3>Wybierz metodę płatności:</h3>
-            <div class="option-container">
+            <label class="radio-label">
                 <input type="radio" id="tipply" name="payment_method" value="tipply" required>
-                <label for="tipply">Tipply</label>
-            </div>
-            <div class="option-container">
+                Tipply
+            </label>
+            <label class="radio-label">
                 <input type="radio" id="paypal" name="payment_method" value="paypal" required>
-                <label for="paypal">PayPal</label>
-            </div>
+                PayPal
+            </label>
 
             <h3>Opcja dostawy:</h3>
-            <div class="option-container">
-                <input type="radio" id="standard" name="shipping" value="standard">
-                <label for="standard">Paczkomat InPost (11.99 PLN)</label>
-            </div>
-            <div class="option-container">
+            <label class="radio-label">
+                <input type="radio" id="standard" name="shipping" value="standard" checked>
+                Paczkomat InPost (11.99 PLN)
+            </label>
+            <label class="radio-label">
                 <input type="radio" id="express" name="shipping" value="express">
-                <label for="express">Kurier InPost (14.99 PLN)</label>
-            </div>
-            <div class="option-container">
-                <input type="radio" id="pickup" name="shipping" value="pickup">
-                <label for="pickup">Odbiór osobisty (0 PLN)</label>
-            </div>
+                Kurier InPost (14.99 PLN)
+            </label>
 
             <button id="pay-now" type="button" class="buy-btn">Kup Teraz</button>
         </div>
     </div>
 
+    <!-- Firebase -->
+    <script src="https://www.gstatic.com/firebasejs/9.8.1/firebase-app.js"></script>
+    <script src="https://www.gstatic.com/firebasejs/9.8.1/firebase-firestore.js"></script>
     <script>
+        // Firebase configuration
+        const firebaseConfig = {
+            apiKey: "AIzaSyB8Z6nYHSOV-Fzbp5bQmkuZMM5iN7t2v78",
+            authDomain: "scylla-ep.firebaseapp.com",
+            projectId: "scylla-ep",
+            storageBucket: "scylla-ep.appspot.com",
+            messagingSenderId: "786465617342",
+            appId: "1:786465617342:web:728fbd76d10424c35435ef"
+        };
+
+        // Initialize Firebase
+        const app = firebase.initializeApp(firebaseConfig);
+        const db = firebase.firestore();
+
+        // Event listener for the button click
         document.getElementById('pay-now').addEventListener('click', function() {
             const name = document.getElementById('name').value.trim();
             const email = document.getElementById('email').value.trim();
-            const phone = document.getElementById('phone').value.trim(); // Numer telefonu
+            const phone = document.getElementById('phone').value.trim();
             const paymentMethod = document.querySelector('input[name="payment_method"]:checked');
             const shippingMethod = document.querySelector('input[name="shipping"]:checked');
-        
-            // Sprawdzanie, czy imię i nazwisko oraz adres e-mail są podane
-            if (!name || !email) {
-                alert("Proszę uzupełnić imię i nazwisko oraz adres e-mail.");
-                return;
-            }
-        
-            if (!paymentMethod) {
-                alert("Proszę wybrać metodę płatności.");
+
+            if (!name || !email || !paymentMethod || !shippingMethod) {
+                alert("Proszę uzupełnić wszystkie wymagane pola.");
                 return;
             }
 
-            if (!shippingMethod) {
-                alert("Proszę wybrać sposób dosatwy.");
-                return;
-            }
-        
-            const method = paymentMethod.value;
-        
-            // Oblicz całkowity koszt na podstawie metody dostawy
-            let totalAmount = 29.99; // Cena płyty
-            if (shippingMethod.value === 'standard') {
-                totalAmount += 11.99; // Koszt dostawy standardowej
-            } else if (shippingMethod.value === 'express') {
-                totalAmount += 14.99; // Koszt dostawy ekspresowej
-            }
-        
-            // Zapisanie zamówienia w Firebase
-      db.collection("orders").add(orderData)
-    .then(() => {
-        alert("Zamówienie zostało złożone!");
-        // Przekierowanie do płatności
-        if (paymentMethod.value === 'tipply') {
-            const tipplyLink = 'https://tipply.pl/@mrkudlaty/?amount=25.00&desc=SCYLLA%20EP';
-            window.location.href = tipplyLink;
-        } else if (paymentMethod.value === 'paypal') {
-            const paypalLink = 'https://www.paypal.com/cgi-bin/webscr?cmd=_xclick&business=your-paypal-email&item_name=SCYLLA%20EP&amount=25.00&currency_code=PLN';
-            window.location.href = paypalLink;
-        }
-    })
-    .catch((error) => {
-        console.error("Błąd przy składaniu zamówienia: ", error);
-        alert("Wystąpił błąd przy składaniu zamówienia.");
-    });
-});
-        </script>
+            const orderData = {
+                name: name,
+                email: email,
+                phone: phone || "Nie podano",
+                paymentMethod: paymentMethod.value,
+                shippingMethod: shippingMethod.value,
+                date: new Date()
+            };
 
-<script src="https://www.gstatic.com/firebasejs/10.13.2/firebase-app.js"></script>
-<script src="https://www.gstatic.com/firebasejs/10.13.2/firebase-analytics.js"></script>
-  <script>
-    // Your web app's Firebase configuration
-    // For Firebase JS SDK v7.20.0 and later, measurementId is optional
-    const firebaseConfig = {
-      apiKey: "AIzaSyB8Z6nYHSOV-Fzbp5bQmkuZMM5iN7t2v78",
-      authDomain: "scylla-ep.firebaseapp.com",
-      projectId: "scylla-ep",
-      storageBucket: "scylla-ep.appspot.com",
-      messagingSenderId: "786465617342",
-      appId: "1:786465617342:web:728fbd76d10424c35435ef",
-      measurementId: "G-QDLSB393PJ"
-    };
-  
-    // Initialize Firebase
-    const app = initializeApp(firebaseConfig);
-    const analytics = getAnalytics(app);
-  </script>
+            // Save order to Firestore
+            db.collection("orders").add(orderData)
+            .then(() => {
+                alert("Zamówienie zostało złożone!");
+
+                // Redirect to payment based on the method
+                if (paymentMethod.value === 'tipply') {
+                    const tipplyLink = 'https://tipply.pl/@mrkudlaty/?amount=25.00&desc=SCYLLA%20EP';
+                    window.location.href = tipplyLink;
+                } else if (paymentMethod.value === 'paypal') {
+                    const paypalLink = 'https://www.paypal.com/cgi-bin/webscr?cmd=_xclick&business=mrkudlaty2006@gmail.com&item_name=SCYLLA%20EP&amount=25.00&currency_code=PLN';
+                    window.location.href = paypalLink;
+                }
+            })
+            .catch((error) => {
+                console.error("Błąd przy składaniu zamówienia: ", error);
+                alert("Wystąpił błąd przy składaniu zamówienia.");
+            });
+        });
+    </script>
 </body>
 </html>
+
