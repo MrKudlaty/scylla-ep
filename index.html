@@ -148,7 +148,7 @@
 
             <h3>Opcja dostawy:</h3>
             <label class="radio-label">
-                <input type="radio" id="standard" name="shipping" value="standard">
+                <input type="radio" id="standard" name="shipping" value="standard" checked>
                 Paczkomat InPost (11.99 PLN)
             </label>
             <label class="radio-label">
@@ -200,13 +200,12 @@
 
             // Walidacja danych
             let valid = true;
-            
             if (!name) {
-                document.getElementById('name-error').textContent = 'Proszę podać imię i nazwisko.';
+                document.getElementById('name-error').textContent = 'Proszę wprowadzić swoje imię i nazwisko.';
                 valid = false;
             }
             if (!email) {
-                document.getElementById('email-error').textContent = 'Proszę podać adres e-mail.';
+                document.getElementById('email-error').textContent = 'Proszę wprowadzić adres e-mail.';
                 valid = false;
             }
             if (!paymentMethod) {
