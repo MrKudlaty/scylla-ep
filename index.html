@@ -84,6 +84,12 @@
         .buy-btn:hover {
             background-color: #218838;
         }
+
+        .error-message {
+            color: red;
+            font-size: 12px;
+            text-align: left;
+        }
     </style>
 </head>
 <body>
@@ -101,9 +107,11 @@
             <h2>Dane do zakupu</h2>
             <label for="name">Imię i nazwisko:</label>
             <input type="text" id="name" name="name" required>
+            <div id="name-error" class="error-message"></div>
 
             <label for="email">Adres e-mail:</label>
             <input type="email" id="email" name="email" required>
+            <div id="email-error" class="error-message"></div>
 
             <label for="phone">Numer telefonu (opcjonalnie):</label>
             <input type="tel" id="phone" name="phone">
@@ -117,15 +125,16 @@
                 <input type="radio" id="paypal" name="payment_method" value="paypal" required>
                 PayPal
             </label>
+            <div id="payment-error" class="error-message"></div>
 
             <h3>Opcja dostawy:</h3>
             <label class="radio-label">
                 <input type="radio" id="standard" name="shipping" value="standard" checked>
-                Paczkomat InPost (11.99 PLN)
+                Standardowa (5 PLN)
             </label>
             <label class="radio-label">
                 <input type="radio" id="express" name="shipping" value="express">
-                Kurier InPost (14.99 PLN)
+                Ekspresowa (15 PLN)
             </label>
             <label class="radio-label">
                 <input type="radio" id="pickup" name="shipping" value="pickup">
@@ -142,13 +151,13 @@
     <script>
         // Firebase configuration
         const firebaseConfig = {
-            apiKey: "AIzaSyB8Z6nYHSOV-Fzbp5bQmkuZMM5iN7t2v78",
-            authDomain: "scylla-ep.firebaseapp.com",
-            projectId: "scylla-ep",
-            storageBucket: "scylla-ep.appspot.com",
-            messagingSenderId: "786465617342",
-            appId: "1:786465617342:web:728fbd76d10424c35435ef",
-            measurementId: "G-QDLSB393PJ"
+             apiKey: "AIzaSyB8Z6nYHSOV-Fzbp5bQmkuZMM5iN7t2v78",
+             authDomain: "scylla-ep.firebaseapp.com",
+             projectId: "scylla-ep",
+             storageBucket: "scylla-ep.appspot.com",
+             messagingSenderId: "786465617342",
+             appId: "1:786465617342:web:728fbd76d10424c35435ef",
+             measurementId: "G-QDLSB393PJ"
         };
 
         // Initialize Firebase
@@ -157,23 +166,51 @@
 
         // Event listener for the button click
         document.getElementById('pay-now').addEventListener('click', function() {
+            // Pobieranie wartości z formularza
             const name = document.getElementById('name').value.trim();
             const email = document.getElementById('email').value.trim();
             const phone = document.getElementById('phone').value.trim();
             const paymentMethod = document.querySelector('input[name="payment_method"]:checked');
             const shippingMethod = document.querySelector('input[name="shipping"]:checked');
 
-            if (!name || !email || !paymentMethod || !shippingMethod) {
-                alert("Proszę uzupełnić wszystkie wymagane pola.");
-                return;
+            // Resetowanie komunikatów o błędach
+            document.getElementById('name-error').textContent = '';
+            document.getElementById('email-error').textContent = '';
+            document.getElementById('payment-error').textContent = '';
+            document.getElementById('shipping-error').textContent = '';
+
+            // Walidacja danych
+            let valid = true;
+            
+            if (!name) {
+                document.getElementById('name-error').textContent = 'Proszę podać imię i nazwisko.';
+                valid = false;
+            }
+            if (!email) {
+                document.getElementById('email-error').textContent = 'Proszę podać adres e-mail.';
+                valid = false;
+            }
+            if (!paymentMethod) {
+                document.getElementById('payment-error').textContent = 'Proszę wybrać metodę płatności.';
+                valid = false;
+            }
+
+            }
+            if (!shippingMethod) {
+                document.getElementById('shipping-error').textContent = 'Proszę wybrać opcje dostawy.';
+                valid = false;
+            }
+
+            if (!valid) {
+                return; // Przerwij działanie, jeśli są błędy w formularzu
             }
 
             // Oblicz całkowity koszt na podstawie metody dostawy
-            let totalAmount = 29.99; // Cena płyty
+            let totalAmount = 25; // Cena płyty
             if (shippingMethod.value === 'standard') {
-                totalAmount += 11.99; // Koszt dostawy standardowej
+                totalAmount += 5; // Koszt dostawy standardowej
             } else if (shippingMethod.value === 'express') {
-                totalAmount += 14.99; // Koszt dostawy ekspresowej
+                totalAmount += 15; // Koszt dostawy ekspresowej
             }
 
             const orderData = {
@@ -186,12 +223,12 @@
                 date: new Date()
             };
 
-            // Save order to Firestore
+            // Zapis zamówienia do Firestore
             db.collection("orders").add(orderData)
             .then(() => {
                 alert("Zamówienie zostało złożone!");
 
-                // Redirect to payment based on the method
+                // Przekierowanie na odpowiednią stronę płatności
                 if (paymentMethod.value === 'tipply') {
                     const tipplyLink = `https://tipply.pl/@mrkudlaty/?amount=${totalAmount.toFixed(2)}&desc=SCYLLA%20EP`;
                     window.location.href = tipplyLink;
