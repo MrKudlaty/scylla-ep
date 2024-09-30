@@ -165,10 +165,10 @@
         const app = firebase.initializeApp(firebaseConfig);
         const db = firebase.firestore();
 
-        // Dodajemy logi dla sprawdzania działania Firebase
-        console.log("Firebase Initialized", db);
+        // Debug Firebase initialization
+        console.log("Firebase initialized: ", db);
 
-        // Event listener for the button click
+        // Dodajemy logowanie do konsoli, aby sprawdzić czy obsługa przycisku działa
         document.getElementById('pay-now').addEventListener('click', function() {
             console.log("Przycisk 'Kup Teraz' został kliknięty.");
 
@@ -178,6 +178,8 @@
             const phone = document.getElementById('phone').value.trim();
             const paymentMethod = document.querySelector('input[name="payment_method"]:checked');
             const shippingMethod = document.querySelector('input[name="shipping"]:checked');
+
+            console.log("Wprowadzone dane: ", {name, email, phone, paymentMethod, shippingMethod});
 
             // Resetowanie komunikatów o błędach
             document.getElementById('name-error').textContent = '';
@@ -207,12 +209,12 @@
 
             if (!valid) {
                 console.log("Walidacja nie powiodła się.");
-                return; // Przerwij działanie, jeśli są błędy w formularzu
+                return; // Zatrzymuje dalsze działania, jeśli dane nie są poprawne
             }
 
             console.log("Walidacja powiodła się, dane są poprawne.");
 
-            // Oblicz całkowity koszt na podstawie metody dostawy
+            // Obliczanie całkowitej kwoty na podstawie metody dostawy
             let totalAmount = 29.99; // Cena płyty
             if (shippingMethod.value === 'standard') {
                 totalAmount += 11.99; // Koszt dostawy standardowej
@@ -230,8 +232,7 @@
                 date: new Date()
             };
 
-            // Logowanie danych zamówienia
-            console.log("Order data: ", orderData);
+            console.log("Dane zamówienia: ", orderData);
 
             // Zapis zamówienia do Firestore
             db.collection("orders").add(orderData)
