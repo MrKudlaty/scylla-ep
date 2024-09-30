@@ -140,46 +140,38 @@
                 <input type="radio" id="pickup" name="shipping" value="pickup">
                 Odbiór osobisty (0 PLN)
             </label>
-            <div id="shipping-error" class="error-message"></div>
 
             <button id="pay-now" type="button" class="buy-btn">Kup Teraz</button>
         </div>
     </div>
 
     <!-- Firebase -->
-    <script src="https://www.gstatic.com/firebasejs/9.8.1/firebase-app.js"></script>
-    <script src="https://www.gstatic.com/firebasejs/9.8.1/firebase-firestore.js"></script>
+    <script src="https://www.gstatic.com/firebasejs/8.6.8/firebase-app.js"></script>
+    <script src="https://www.gstatic.com/firebasejs/8.6.8/firebase-firestore.js"></script>
     <script>
         // Firebase configuration
         const firebaseConfig = {
-             apiKey: "AIzaSyB8Z6nYHSOV-Fzbp5bQmkuZMM5iN7t2v78",
-             authDomain: "scylla-ep.firebaseapp.com",
-             projectId: "scylla-ep",
-             storageBucket: "scylla-ep.appspot.com",
-             messagingSenderId: "786465617342",
-             appId: "1:786465617342:web:728fbd76d10424c35435ef",
-             measurementId: "G-QDLSB393PJ"
+            apiKey: "AIzaSyB8Z6nYHSOV-Fzbp5bQmkuZMM5iN7t2v78",
+            authDomain: "scylla-ep.firebaseapp.com",
+            projectId: "scylla-ep",
+            storageBucket: "scylla-ep.appspot.com",
+            messagingSenderId: "786465617342",
+            appId: "1:786465617342:web:728fbd76d10424c35435ef",
+            measurementId: "G-QDLSB393PJ"
         };
 
         // Initialize Firebase
-        const app = firebase.initializeApp(firebaseConfig);
+        firebase.initializeApp(firebaseConfig);
         const db = firebase.firestore();
 
-        // Debug Firebase initialization
-        console.log("Firebase initialized: ", db);
-
-        // Dodajemy logowanie do konsoli, aby sprawdzić czy obsługa przycisku działa
+        // Event listener for the button click
         document.getElementById('pay-now').addEventListener('click', function() {
-            console.log("Przycisk 'Kup Teraz' został kliknięty.");
-
             // Pobieranie wartości z formularza
             const name = document.getElementById('name').value.trim();
             const email = document.getElementById('email').value.trim();
             const phone = document.getElementById('phone').value.trim();
             const paymentMethod = document.querySelector('input[name="payment_method"]:checked');
             const shippingMethod = document.querySelector('input[name="shipping"]:checked');
-
-            console.log("Wprowadzone dane: ", {name, email, phone, paymentMethod, shippingMethod});
 
             // Resetowanie komunikatów o błędach
             document.getElementById('name-error').textContent = '';
@@ -189,7 +181,7 @@
 
             // Walidacja danych
             let valid = true;
-
+            
             if (!name) {
                 document.getElementById('name-error').textContent = 'Proszę podać imię i nazwisko.';
                 valid = false;
@@ -203,57 +195,28 @@
                 valid = false;
             }
             if (!shippingMethod) {
-                document.getElementById('shipping-error').textContent = 'Proszę wybrać opcję dostawy.';
+                document.getElementById('shipping-error').textContent = 'Proszę wybrać metodę dostawy.';
                 valid = false;
             }
 
-            if (!valid) {
-                console.log("Walidacja nie powiodła się.");
-                return; // Zatrzymuje dalsze działania, jeśli dane nie są poprawne
+            // Jeśli dane są poprawne, zapisujemy do Firestore
+            if (valid) {
+                db.collection('orders').add({
+                    name: name,
+                    email: email,
+                    phone: phone,
+                    paymentMethod: paymentMethod.value,
+                    shippingMethod: shippingMethod.value,
+                    createdAt: firebase.firestore.FieldValue.serverTimestamp()
+                }).then(() => {
+                    alert('Zamówienie zostało złożone pomyślnie!');
+                }).catch((error) => {
+                    console.error('Błąd dodawania zamówienia: ', error);
+                });
             }
-
-            console.log("Walidacja powiodła się, dane są poprawne.");
-
-            // Obliczanie całkowitej kwoty na podstawie metody dostawy
-            let totalAmount = 29.99; // Cena płyty
-            if (shippingMethod.value === 'standard') {
-                totalAmount += 11.99; // Koszt dostawy standardowej
-            } else if (shippingMethod.value === 'express') {
-                totalAmount += 14.99; // Koszt dostawy ekspresowej
-            }
-
-            const orderData = {
-                name: name,
-                email: email,
-                phone: phone || "Nie podano",
-                paymentMethod: paymentMethod.value,
-                shippingMethod: shippingMethod.value,
-                totalAmount: totalAmount,
-                date: new Date()
-            };
-
-            console.log("Dane zamówienia: ", orderData);
-
-            // Zapis zamówienia do Firestore
-            db.collection("orders").add(orderData)
-            .then(() => {
-                alert("Zamówienie zostało złożone!");
-
-                // Przekierowanie na odpowiednią stronę płatności
-                if (paymentMethod.value === 'tipply') {
-                    const tipplyLink = `https://tipply.pl/@mrkudlaty/?amount=${totalAmount.toFixed(2)}&desc=SCYLLA%20EP`;
-                    window.location.href = tipplyLink;
-                } else if (paymentMethod.value === 'paypal') {
-                    const paypalLink = `https://www.paypal.com/cgi-bin/webscr?cmd=_xclick&business=mrkudlaty2006@gmail.com&item_name=SCYLLA%20EP&amount=${totalAmount.toFixed(2)}&currency_code=PLN`;
-                    window.location.href = paypalLink;
-                }
-            })
-            .catch((error) => {
-                console.error("Błąd przy składaniu zamówienia: ", error);
-                alert("Wystąpił błąd przy składaniu zamówienia.");
-            });
         });
     </script>
 </body>
 </html>
+
 
