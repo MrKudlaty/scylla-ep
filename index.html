@@ -215,8 +215,25 @@
                     createdAt: firebase.firestore.FieldValue.serverTimestamp()
                 }).then(() => {
                     alert('Zamówienie zostało złożone pomyślnie!');
+
+                    // Przekierowanie na stronę płatności
+                    let totalAmount = 29.99; // Cena płyty
+                    if (shippingMethod.value === 'standard') {
+                        totalAmount += 11.99; // Koszt dostawy standardowej
+                    } else if (shippingMethod.value === 'express') {
+                        totalAmount += 14.99; // Koszt dostawy ekspresowej
+                    }
+
+                    if (paymentMethod.value === 'tipply') {
+                        const tipplyLink = `https://tipply.pl/@mrkudlaty/?amount=${totalAmount.toFixed(2)}&desc=SCYLLA%20EP`;
+                        window.location.href = tipplyLink;
+                    } else if (paymentMethod.value === 'paypal') {
+                        const paypalLink = `https://www.paypal.com/cgi-bin/webscr?cmd=_xclick&business=mrkudlaty2006@gmail.com&item_name=SCYLLA%20EP&amount=${totalAmount.toFixed(2)}&currency_code=PLN`;
+                        window.location.href = paypalLink;
+                    }
                 }).catch((error) => {
-                    console.error('Błąd dodawania zamówienia: ', error);
+                    console.error("Błąd przy składaniu zamówienia: ", error);
+                    alert("Wystąpił błąd przy składaniu zamówienia.");
                 });
             }
         });
