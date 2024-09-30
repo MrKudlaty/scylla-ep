@@ -100,7 +100,7 @@
                 <img src="scylla.jpg" alt="SCYLLA EP">
             </div>
             <p><strong>Artysta:</strong> MrKudłaty & SzczepAn</p>
-            <p><strong>Cena:</strong> 25 PLN</p>
+            <p><strong>Cena:</strong> 29.99 PLN</p>
         </div>
 
         <div class="purchase-form">
@@ -130,16 +130,17 @@
             <h3>Opcja dostawy:</h3>
             <label class="radio-label">
                 <input type="radio" id="standard" name="shipping" value="standard" checked>
-                Standardowa (5 PLN)
+                Paczkomat InPost (11.99 PLN)
             </label>
             <label class="radio-label">
                 <input type="radio" id="express" name="shipping" value="express">
-                Ekspresowa (15 PLN)
+                Kurier InPost (14.99 PLN)
             </label>
             <label class="radio-label">
                 <input type="radio" id="pickup" name="shipping" value="pickup">
                 Odbiór osobisty (0 PLN)
             </label>
+            <div id="shipping-error" class="error-message"></div>
 
             <button id="pay-now" type="button" class="buy-btn">Kup Teraz</button>
         </div>
@@ -194,10 +195,8 @@
                 document.getElementById('payment-error').textContent = 'Proszę wybrać metodę płatności.';
                 valid = false;
             }
-
-            }
             if (!shippingMethod) {
-                document.getElementById('shipping-error').textContent = 'Proszę wybrać opcje dostawy.';
+                document.getElementById('shipping-error').textContent = 'Proszę wybrać opcję dostawy.';
                 valid = false;
             }
 
@@ -206,11 +205,11 @@
             }
 
             // Oblicz całkowity koszt na podstawie metody dostawy
-            let totalAmount = 25; // Cena płyty
+            let totalAmount = 29.99; // Cena płyty
             if (shippingMethod.value === 'standard') {
-                totalAmount += 5; // Koszt dostawy standardowej
+                totalAmount += 11.99; // Koszt dostawy standardowej
             } else if (shippingMethod.value === 'express') {
-                totalAmount += 15; // Koszt dostawy ekspresowej
+                totalAmount += 14.99; // Koszt dostawy ekspresowej
             }
 
             const orderData = {
