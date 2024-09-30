@@ -53,9 +53,12 @@
         .purchase-form label {
             text-align: left;
             display: inline-block;
+            margin-right: 10px;
         }
 
-        .purchase-form input {
+        .purchase-form input[type="text"],
+        .purchase-form input[type="email"],
+        .purchase-form input[type="tel"] {
             width: 100%;
             padding: 10px;
             margin-bottom: 15px;
@@ -91,7 +94,7 @@
                 <img src="scylla.jpg" alt="SCYLLA EP">
             </div>
             <p><strong>Artysta:</strong> MrKudłaty & SzczepAn</p>
-            <p><strong>Cena:</strong> 29.99 PLN</p>
+            <p><strong>Cena:</strong> 25 PLN</p>
         </div>
 
         <div class="purchase-form">
@@ -124,6 +127,10 @@
                 <input type="radio" id="express" name="shipping" value="express">
                 Kurier InPost (14.99 PLN)
             </label>
+            <label class="radio-label">
+                <input type="radio" id="pickup" name="shipping" value="pickup">
+                Odbiór osobisty (0 PLN)
+            </label>
 
             <button id="pay-now" type="button" class="buy-btn">Kup Teraz</button>
         </div>
@@ -140,7 +147,8 @@
             projectId: "scylla-ep",
             storageBucket: "scylla-ep.appspot.com",
             messagingSenderId: "786465617342",
-            appId: "1:786465617342:web:728fbd76d10424c35435ef"
+            appId: "1:786465617342:web:728fbd76d10424c35435ef",
+            measurementId: "G-QDLSB393PJ"
         };
 
         // Initialize Firebase
@@ -160,12 +168,21 @@
                 return;
             }
 
+            // Oblicz całkowity koszt na podstawie metody dostawy
+            let totalAmount = 29.99; // Cena płyty
+            if (shippingMethod.value === 'standard') {
+                totalAmount += 11.99; // Koszt dostawy standardowej
+            } else if (shippingMethod.value === 'express') {
+                totalAmount += 14.99; // Koszt dostawy ekspresowej
+            }
+
             const orderData = {
                 name: name,
                 email: email,
                 phone: phone || "Nie podano",
                 paymentMethod: paymentMethod.value,
                 shippingMethod: shippingMethod.value,
+                totalAmount: totalAmount,
                 date: new Date()
             };
 
@@ -176,10 +193,10 @@
 
                 // Redirect to payment based on the method
                 if (paymentMethod.value === 'tipply') {
-                    const tipplyLink = 'https://tipply.pl/@mrkudlaty/?amount=25.00&desc=SCYLLA%20EP';
+                    const tipplyLink = `https://tipply.pl/@mrkudlaty/?amount=${totalAmount.toFixed(2)}&desc=SCYLLA%20EP`;
                     window.location.href = tipplyLink;
                 } else if (paymentMethod.value === 'paypal') {
-                    const paypalLink = 'https://www.paypal.com/cgi-bin/webscr?cmd=_xclick&business=mrkudlaty2006@gmail.com&item_name=SCYLLA%20EP&amount=25.00&currency_code=PLN';
+                    const paypalLink = `https://www.paypal.com/cgi-bin/webscr?cmd=_xclick&business=mrkudlaty2006@gmail.com&item_name=SCYLLA%20EP&amount=${totalAmount.toFixed(2)}&currency_code=PLN`;
                     window.location.href = paypalLink;
                 }
             })
@@ -191,4 +208,3 @@
     </script>
 </body>
 </html>
-
