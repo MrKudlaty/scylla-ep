@@ -165,8 +165,13 @@
         const app = firebase.initializeApp(firebaseConfig);
         const db = firebase.firestore();
 
+        // Dodajemy logi dla sprawdzania działania Firebase
+        console.log("Firebase Initialized", db);
+
         // Event listener for the button click
         document.getElementById('pay-now').addEventListener('click', function() {
+            console.log("Przycisk 'Kup Teraz' został kliknięty.");
+
             // Pobieranie wartości z formularza
             const name = document.getElementById('name').value.trim();
             const email = document.getElementById('email').value.trim();
@@ -182,7 +187,7 @@
 
             // Walidacja danych
             let valid = true;
-            
+
             if (!name) {
                 document.getElementById('name-error').textContent = 'Proszę podać imię i nazwisko.';
                 valid = false;
@@ -201,8 +206,11 @@
             }
 
             if (!valid) {
+                console.log("Walidacja nie powiodła się.");
                 return; // Przerwij działanie, jeśli są błędy w formularzu
             }
+
+            console.log("Walidacja powiodła się, dane są poprawne.");
 
             // Oblicz całkowity koszt na podstawie metody dostawy
             let totalAmount = 29.99; // Cena płyty
@@ -221,6 +229,9 @@
                 totalAmount: totalAmount,
                 date: new Date()
             };
+
+            // Logowanie danych zamówienia
+            console.log("Order data: ", orderData);
 
             // Zapis zamówienia do Firestore
             db.collection("orders").add(orderData)
@@ -244,3 +255,4 @@
     </script>
 </body>
 </html>
+
