@@ -20,42 +20,41 @@
 
         .container {
             display: flex;
+            flex-direction: column; /* Zmiana kierunku na kolumnę dla małych ekranów */
             background-color: rgba(255, 255, 255, 0.8); /* Przezroczyste białe tło dla kontenera */
             border-radius: 10px;
             padding: 20px;
             box-shadow: 0 0 10px rgba(0, 0, 0, 0.1);
             max-width: 800px;
-            width: 100%;
+            width: 90%; /* Ustawienie szerokości na 90% dla lepszej responsywności */
+            margin: auto; /* Wyśrodkowanie kontenera */
         }
 
         .album-info {
-            flex: 1;
-            margin-right: 20px;
-            text-align: left;
+            text-align: center; /* Wyśrodkowanie tekstu w albumie */
+            margin-bottom: 20px;
         }
 
         .album-cover img {
-            width: 100%;
+            width: 100%; /* Obraz wypełnia całą szerokość kontenera */
             border-radius: 10px;
+            max-height: 300px; /* Ograniczenie maksymalnej wysokości obrazka */
+            object-fit: cover; /* Utrzymanie proporcji obrazka */
         }
 
-        h1 {
+        h1, h2 {
             color: #333;
-            margin-bottom: 20px;
-            text-align: center;
-            flex-basis: 100%;
+            margin: 10px 0;
         }
 
         .purchase-form {
-            flex: 1;
             text-align: center;
-            margin-left: 20px;
         }
 
         .purchase-form label {
             text-align: left;
-            display: inline-block;
-            margin-right: 10px;
+            display: block; /* Ustawienie na block dla lepszej responsywności */
+            margin: 10px 0 5px; /* Marginesy dla lepszej czytelności */
         }
 
         .purchase-form input[type="text"],
@@ -91,6 +90,24 @@
             color: red;
             font-size: 12px;
             text-align: left;
+        }
+
+        /* Media Queries dla responsywności */
+        @media (min-width: 600px) {
+            .container {
+                flex-direction: row; /* Zmiana kierunku na wiersz dla większych ekranów */
+            }
+
+            .album-info {
+                flex: 1; /* Wypełnienie miejsca w wierszu */
+                margin-right: 20px; /* Odstęp między albumem a formularzem */
+                text-align: left; /* Przywrócenie tekstu do lewej */
+            }
+
+            .purchase-form {
+                flex: 1; /* Wypełnienie miejsca w wierszu */
+                margin-left: 20px; /* Odstęp między albumem a formularzem */
+            }
         }
     </style>
 </head>
@@ -197,40 +214,29 @@
                 valid = false;
             }
             if (!shippingMethod) {
-                document.getElementById('shipping-error').textContent = 'Proszę wybrać opcje dostawy.';
+                document.getElementById('shipping-error').textContent = 'Proszę wybrać opcję dostawy.';
                 valid = false;
             }
 
-            if (!valid) {
-                return; // Przerwij działanie, jeśli są błędy w formularzu
-            }
+            if (!valid) return; // Jeśli są błędy, nie wysyłaj formularza
 
-            // Oblicz całkowity koszt na podstawie metody dostawy
-            let totalAmount = 29.99; // Cena płyty
-            if (shippingMethod.value === 'standard') {
-                totalAmount += 11.99; // Koszt dostawy standardowej
-            } else if (shippingMethod.value === 'express') {
-                totalAmount += 14.99; // Koszt dostawy ekspresowej
-            }
-
+            // Zbieranie danych do zamówienia
+            const totalAmount = 29.99 + (shippingMethod.value === 'standard' ? 11.99 : shippingMethod.value === 'express' ? 14.99 : 0);
             const orderData = {
                 name: name,
                 email: email,
-                phone: phone || "Nie podano",
-                paymentMethod: paymentMethod.value,
-                shippingMethod: shippingMethod.value,
-                totalAmount: totalAmount,
-                date: new Date()
+                phone: phone,
+                payment_method: paymentMethod.value,
+                shipping_method: shippingMethod.value,
+                total_amount: totalAmount
             };
 
-            // Zapis zamówienia do Firestore
+            // Dodawanie zamówienia do Firestore
             db.collection("orders").add(orderData)
             .then(() => {
-                alert("Zamówienie zostało złożone!");
-
-                // Przekierowanie na odpowiednią stronę płatności
+                // Przekierowanie do odpowiedniej strony płatności
                 if (paymentMethod.value === 'tipply') {
-                    const tipplyLink = `https://tipply.pl/@mrkudlaty/?amount=${totalAmount.toFixed(2)}&description=Zakup%20płyty%20SCYLLA%20EP`;
+                    const tipplyLink = `https://tipply.pl/pay?amount=${totalAmount.toFixed(2)}&description=Zakup%20płyty%20SCYLLA%20EP`;
                     window.location.href = tipplyLink;
                 } else if (paymentMethod.value === 'paypal') {
                     const paypalLink = `https://www.paypal.com/cgi-bin/webscr?cmd=_xclick&business=your-paypal-email@example.com&item_name=Zakup%20płyty%20SCYLLA%20EP&amount=${totalAmount.toFixed(2)}&currency_code=PLN`;
