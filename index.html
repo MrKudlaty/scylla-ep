@@ -7,9 +7,9 @@
     <style>
         body {
             font-family: Arial, sans-serif;
-            background-image: url('tło.png'); /* Ustawienie tła na zdjęcie */
-            background-size: cover; /* Pokrycie całego tła */
-            background-position: center; /* Wyśrodkowanie tła */
+            background-image: url('tło.png'); 
+            background-size: cover; 
+            background-position: center; 
             margin: 0;
             padding: 0;
             display: flex;
@@ -140,22 +140,22 @@
                 PayPal
             </label>
             <label class="radio-label" id="pay-on-delivery-option" style="display: none;">
-                <input type="radio" id="pay_on_delivery" name="payment_method" value="pay_on_delivery">
+                <input type="radio" id="pay_on_delivery" name="payment_method" value="płatność przy odbiorze">
                 Płatność przy odbiorze
             </label>
             <div id="payment-error" class="error-message"></div>
 
             <h3>Opcja dostawy:</h3>
             <label class="radio-label">
-                <input type="radio" id="standard" name="shipping" value="standard">
+                <input type="radio" id="standard" name="shipping" value="paczkomat">
                 Paczkomat InPost (11.99 PLN)
             </label>
             <label class="radio-label">
-                <input type="radio" id="express" name="shipping" value="express">
+                <input type="radio" id="express" name="shipping" value="kurier">
                 Kurier InPost (14.99 PLN)
             </label>
             <label class="radio-label">
-                <input type="radio" id="pickup" name="shipping" value="pickup">
+                <input type="radio" id="pickup" name="shipping" value="odbiór osobisty">
                 Odbiór osobisty (0 PLN)
             </label>
 
@@ -163,11 +163,11 @@
         </div>
     </div>
 
-    <!-- Firebase 8.x -->
+    
     <script src="https://www.gstatic.com/firebasejs/8.6.1/firebase-app.js"></script>
     <script src="https://www.gstatic.com/firebasejs/8.6.1/firebase-firestore.js"></script>
     <script>
-        // Firebase configuration
+        
         const firebaseConfig = {
             apiKey: "AIzaSyB8Z6nYHSOV-Fzbp5bQmkuZMM5iN7t2v78",
             authDomain: "scylla-ep.firebaseapp.com",
@@ -178,25 +178,25 @@
             measurementId: "G-QDLSB393PJ"
         };
 
-        // Initialize Firebase
+        
         firebase.initializeApp(firebaseConfig);
         const db = firebase.firestore();
 
-        // Event listener for the button click
+        
         document.getElementById('pay-now').addEventListener('click', function() {
-            // Pobieranie wartości z formularza
+            
             const name = document.getElementById('name').value.trim();
             const email = document.getElementById('email').value.trim();
             const phone = document.getElementById('phone').value.trim();
             const paymentMethod = document.querySelector('input[name="payment_method"]:checked');
             const shippingMethod = document.querySelector('input[name="shipping"]:checked');
 
-            // Resetowanie komunikatów o błędach
+           
             document.getElementById('name-error').textContent = '';
             document.getElementById('email-error').textContent = '';
             document.getElementById('payment-error').textContent = '';
 
-            // Walidacja
+            
             let valid = true;
             if (!name) {
                 document.getElementById('name-error').textContent = 'Proszę wprowadzić swoje imię i nazwisko.';
@@ -215,10 +215,10 @@
                 valid = false;
             }
 
-            if (!valid) return; // Jeśli są błędy, nie wysyłaj formularza
+            if (!valid) return; 
 
-            // Zbieranie danych do zamówienia
-            const totalAmount = 29.99 + (shippingMethod.value === 'standard' ? 11.99 : shippingMethod.value === 'express' ? 14.99 : 0);
+            
+            const totalAmount = 29.99 + (shippingMethod.value === 'paczkomat' ? 11.99 : shippingMethod.value === 'kurier' ? 14.99 : 0);
             const orderData = {
                 name: name,
                 email: email,
@@ -228,11 +228,11 @@
                 total_amount: totalAmount
             };
 
-            // Dodawanie zamówienia do Firestore
+            
             db.collection("orders").add(orderData)
             .then(() => {
-                // Sprawdzenie metody płatności i przekierowanie
-                if (shippingMethod.value === 'pickup' && paymentMethod.value === 'pay_on_delivery') {
+                
+                if (shippingMethod.value === 'odbiór osobisty' && paymentMethod.value === 'płatność przy odbiorze') {
                     alert('Zamówienie zostało złożone. Zapłać przy odbiorze.');
                 } else if (paymentMethod.value === 'paypal') {
                     const paypalLink = `https://www.paypal.com/cgi-bin/webscr?cmd=_xclick&business=mrkudlaty2006@gmail.com&item_name=Zakup%20płyty%20SCYLLA%20EP&amount=${totalAmount.toFixed(2)}&currency_code=PLN`;
@@ -244,14 +244,14 @@
             });
         });
 
-        // Logika ukrywania/wyświetlania płatności przy odbiorze
+       
         document.querySelectorAll('input[name="shipping"]').forEach((shippingInput) => {
             shippingInput.addEventListener('change', function() {
                 const payOnDeliveryOption = document.getElementById('pay-on-delivery-option');
                 if (this.value === 'pickup') {
-                    payOnDeliveryOption.style.display = 'block'; // Pokaż płatność przy odbiorze
+                    payOnDeliveryOption.style.display = 'block'; 
                 } else {
-                    payOnDeliveryOption.style.display = 'none'; // Ukryj płatność przy odbiorze
+                    payOnDeliveryOption.style.display = 'none'; 
                 }
             });
         });
