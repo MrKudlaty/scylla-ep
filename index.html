@@ -20,26 +20,26 @@
 
         .container {
             display: flex;
-            flex-direction: column; /* Zmiana kierunku na kolumnę dla małych ekranów */
-            background-color: rgba(255, 255, 255, 0.8); /* Przezroczyste białe tło dla kontenera */
+            flex-direction: column;
+            background-color: rgba(255, 255, 255, 0.8);
             border-radius: 10px;
             padding: 20px;
             box-shadow: 0 0 10px rgba(0, 0, 0, 0.1);
             max-width: 800px;
-            width: 90%; /* Ustawienie szerokości na 90% dla lepszej responsywności */
-            margin: auto; /* Wyśrodkowanie kontenera */
+            width: 90%;
+            margin: auto;
         }
 
         .album-info {
-            text-align: center; /* Wyśrodkowanie tekstu w albumie */
+            text-align: center;
             margin-bottom: 20px;
         }
 
         .album-cover img {
-            width: 100%; /* Obraz wypełnia całą szerokość kontenera */
+            width: 100%;
             border-radius: 10px;
-            max-height: 300px; /* Ograniczenie maksymalnej wysokości obrazka */
-            object-fit: cover; /* Utrzymanie proporcji obrazka */
+            max-height: 300px;
+            object-fit: cover;
         }
 
         h1, h2 {
@@ -52,9 +52,8 @@
         }
 
         .purchase-form label {
-            text-align: left;
-            display: block; /* Ustawienie na block dla lepszej responsywności */
-            margin: 10px 0 5px; /* Marginesy dla lepszej czytelności */
+            display: block;
+            margin: 10px 0 5px;
         }
 
         .purchase-form input[type="text"],
@@ -92,21 +91,21 @@
             text-align: left;
         }
 
-        /* Media Queries dla responsywności */
+        /* Media Queries */
         @media (min-width: 600px) {
             .container {
-                flex-direction: row; /* Zmiana kierunku na wiersz dla większych ekranów */
+                flex-direction: row;
             }
 
             .album-info {
-                flex: 1; /* Wypełnienie miejsca w wierszu */
-                margin-right: 20px; /* Odstęp między albumem a formularzem */
-                text-align: left; /* Przywrócenie tekstu do lewej */
+                flex: 1;
+                margin-right: 20px;
+                text-align: left;
             }
 
             .purchase-form {
-                flex: 1; /* Wypełnienie miejsca w wierszu */
-                margin-left: 20px; /* Odstęp między albumem a formularzem */
+                flex: 1;
+                margin-left: 20px;
             }
         }
     </style>
@@ -137,12 +136,12 @@
 
             <h3>Wybierz metodę płatności:</h3>
             <label class="radio-label">
-                <input type="radio" id="tipply" name="payment_method" value="tipply" required>
-                Tipply
-            </label>
-            <label class="radio-label">
                 <input type="radio" id="paypal" name="payment_method" value="paypal" required>
                 PayPal
+            </label>
+            <label class="radio-label" id="pay-on-delivery-option" style="display: none;">
+                <input type="radio" id="pay_on_delivery" name="payment_method" value="pay_on_delivery">
+                Płatność przy odbiorze
             </label>
             <div id="payment-error" class="error-message"></div>
 
@@ -232,10 +231,9 @@
             // Dodawanie zamówienia do Firestore
             db.collection("orders").add(orderData)
             .then(() => {
-                // Przekierowanie do odpowiedniej strony płatności
-                if (paymentMethod.value === 'tipply') {
-                    const tipplyLink = `https://tipply.pl/pay?amount=${totalAmount.toFixed(2)}&description=Zakup%20płyty%20SCYLLA%20EP`;
-                    window.location.href = tipplyLink;
+                // Sprawdzenie metody płatności i przekierowanie
+                if (shippingMethod.value === 'pickup' && paymentMethod.value === 'pay_on_delivery') {
+                    alert('Zamówienie zostało złożone. Zapłać przy odbiorze.');
                 } else if (paymentMethod.value === 'paypal') {
                     const paypalLink = `https://www.paypal.com/cgi-bin/webscr?cmd=_xclick&business=mrkudlaty2006@gmail.com&item_name=Zakup%20płyty%20SCYLLA%20EP&amount=${totalAmount.toFixed(2)}&currency_code=PLN`;
                     window.location.href = paypalLink;
@@ -245,8 +243,18 @@
                 console.error("Błąd przy dodawaniu zamówienia: ", error);
             });
         });
+
+        // Logika ukrywania/wyświetlania płatności przy odbiorze
+        document.querySelectorAll('input[name="shipping"]').forEach((shippingInput) => {
+            shippingInput.addEventListener('change', function() {
+                const payOnDeliveryOption = document.getElementById('pay-on-delivery-option');
+                if (this.value === 'pickup') {
+                    payOnDeliveryOption.style.display = 'block'; // Pokaż płatność przy odbiorze
+                } else {
+                    payOnDeliveryOption.style.display = 'none'; // Ukryj płatność przy odbiorze
+                }
+            });
+        });
     </script>
 </body>
 </html>
-
-
