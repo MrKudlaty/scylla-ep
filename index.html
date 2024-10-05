@@ -91,6 +91,24 @@
             text-align: left;
         }
 
+        /* Media Queries */
+        @media (min-width: 600px) {
+            .container {
+                flex-direction: row;
+            }
+
+            .album-info {
+                flex: 1;
+                margin-right: 20px;
+                text-align: left;
+            }
+
+            .purchase-form {
+                flex: 1;
+                margin-left: 20px;
+            }
+        }
+
         /* Styl dla modalnego okna mapy Paczkomatów */
         #map-modal {
             display: none;
@@ -113,16 +131,15 @@
         }
 
         #close-modal {
-            color: black;
+            color: white;
             float: right;
             font-size: 28px;
             font-weight: bold;
             cursor: pointer;
         }
     </style>
+    <!-- Skrypt InPost do mapy paczkomatów -->
     <script src="https://geowidget.easypack24.net/js/sdk-for-javascript.js"></script>
-    <script src="https://www.gstatic.com/firebasejs/8.6.1/firebase-app.js"></script>
-    <script src="https://www.gstatic.com/firebasejs/8.6.1/firebase-firestore.js"></script>
 </head>
 <body>
     <div class="container">
@@ -195,6 +212,8 @@
         </div>
     </div>
 
+    <script src="https://www.gstatic.com/firebasejs/8.6.1/firebase-app.js"></script>
+    <script src="https://www.gstatic.com/firebasejs/8.6.1/firebase-firestore.js"></script>
     <script>
         // Konfiguracja Firebase
         const firebaseConfig = {
@@ -212,9 +231,16 @@
 
         document.querySelectorAll('input[name="shipping"]').forEach((shippingInput) => {
             shippingInput.addEventListener('change', function() {
+                const payOnDeliveryOption = document.getElementById('pay-on-delivery-option');
+                const paypalOption = document.getElementById('paypal');
                 const paczkomatContainer = document.getElementById('paczkomat-container');
+
                 // Jeśli użytkownik wybierze "Paczkomat", pokaż przycisk do wyboru Paczkomatu
-                paczkomatContainer.style.display = (this.value === 'paczkomat') ? 'block' : 'none';
+                if (this.value === 'paczkomat') {
+                    paczkomatContainer.style.display = 'block';
+                } else {
+                    paczkomatContainer.style.display = 'none';
+                }
             });
         });
 
@@ -226,7 +252,7 @@
             const map = new PaczkomatyMapWidget({
                 target: 'map',
                 onPointSelected: function(point) {
-                    document.getElementById('paczkomat-info').textContent = `Wybrano paczkomat: ${point.name}, ${point.address.line1}, ${point.address.line2}`;
+                    document.getElementById('paczkomat-info').textContent = Wybrano paczkomat: ${point.name}, ${point.address.line1}, ${point.address.line2};
                     modal.style.display = 'none';
                 }
             });
@@ -288,9 +314,9 @@
 
                 db.collection("orders").add(orderData).then(() => {
                     if (paymentMethod.value === 'blik') {
-                        window.location.href = `blik.html?message=${encodeURIComponent(`Numer telefonu: ${phone || 'Brak numeru telefonu'}\nKwota: ${totalAmount} PLN\nTytuł przelewu: ${name}, ${shippingMethod.value}`)}`;
+                        window.location.href = blik.html?message=${encodeURIComponent(Numer telefonu: ${phone || 'Brak numeru telefonu'}\nKwota: ${totalAmount} PLN\nTytuł przelewu: ${name}, ${shippingMethod.value})};
                     } else if (paymentMethod.value === 'paypal') {
-                        const paypalUrl = `https://www.paypal.com/cgi-bin/webscr?cmd=_xclick&business=mrkudlaty2006@gmail.com&item_name=SCYLLA+EP&amount=${totalAmount}&currency_code=PLN`;
+                        const paypalUrl = https://www.paypal.com/cgi-bin/webscr?cmd=_xclick&business=mrkudlaty2006@gmail.com&item_name=SCYLLA+EP&amount=${totalAmount}&currency_code=PLN;
                         window.location.href = paypalUrl;
                     } else {
                         window.location.href = "podziekowania.html";
@@ -303,4 +329,3 @@
     </script>
 </body>
 </html>
-
