@@ -182,7 +182,23 @@
         firebase.initializeApp(firebaseConfig);
         const db = firebase.firestore();
 
-        // Event listener for the button click
+document.querySelectorAll('input[name="shipping"]').forEach((shippingInput) => {
+    shippingInput.addEventListener('change', function() {
+        const payOnDeliveryOption = document.getElementById('pay-on-delivery-option');
+        const paypalOption = document.getElementById('paypal');
+
+        // Jeśli użytkownik wybierze "Odbiór osobisty", pokaż "Płatność przy odbiorze" i ukryj PayPal
+        if (this.value === 'odbiór osobisty') {
+            payOnDeliveryOption.style.display = 'block';  // Pokaż "Płatność przy odbiorze"
+            paypalOption.disabled = true;                 // Wyłącz opcję PayPal
+        } else {
+            payOnDeliveryOption.style.display = 'none';   // Ukryj "Płatność przy odbiorze"
+            paypalOption.disabled = false;                // Włącz opcję PayPal
+        }
+    });
+});
+
+// Event listener dla przycisku "Kup Teraz"
 document.getElementById('pay-now').addEventListener('click', function() {
     // Pobieranie wartości z formularza
     const name = document.getElementById('name').value.trim();
@@ -218,7 +234,7 @@ document.getElementById('pay-now').addEventListener('click', function() {
     if (!valid) return; // Jeśli są błędy, nie wysyłaj formularza
 
     // Zbieranie danych do zamówienia
-    const totalAmount = 29.99 + (shippingMethod.value === 'standard' ? 11.99 : shippingMethod.value === 'express' ? 14.99 : 0);
+    const totalAmount = 29.99 + (shippingMethod.value === 'paczkomat' ? 11.99 : shippingMethod.value === 'kurier' ? 14.99 : 0);
     const orderData = {
         name: name,
         email: email,
@@ -239,16 +255,6 @@ document.getElementById('pay-now').addEventListener('click', function() {
     });
 });
 
-        document.querySelectorAll('input[name="shipping"]').forEach((shippingInput) => {
-            shippingInput.addEventListener('change', function() {
-                const payOnDeliveryOption = document.getElementById('pay-on-delivery-option');
-                if (this.value === 'pickup') {
-                    payOnDeliveryOption.style.display = 'block'; 
-                } else {
-                    payOnDeliveryOption.style.display = 'none'; 
-                }
-            });
-        });
     </script>
 </body>
 </html>
