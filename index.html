@@ -254,7 +254,7 @@ document.getElementById('pay-now').addEventListener('click', function() {
         if (paymentMethod.value === 'blik') {
             // Przekierowanie do strony z informacjami o BLIK
             const message = `Numer telefonu: 123456789\nKwota: ${totalAmount} PLN\nTytuł przelewu: ${name}, ${shippingMethod.value}`;
-            window.location.href = `blik-info.html?message=${encodeURIComponent(message)}`;
+            window.location.href = `blik.html?message=${encodeURIComponent(message)}`;
         } else {
             // Przekierowanie do strony z podziękowaniem
             window.location.href = "podziękowania.html";
