@@ -201,7 +201,7 @@ document.querySelectorAll('input[name="shipping"]').forEach((shippingInput) => {
     });
 });
 
-// Event listener dla przycisku "Kup Teraz"
+        // Event listener dla przycisku "Kup Teraz"
 document.getElementById('pay-now').addEventListener('click', function() {
     // Pobieranie wartości z formularza
     const name = document.getElementById('name').value.trim();
@@ -250,16 +250,14 @@ document.getElementById('pay-now').addEventListener('click', function() {
     // Dodawanie zamówienia do Firestore
     db.collection("orders").add(orderData)
     .then(() => {
-        // Sprawdzanie wybranej metody płatności
-       if (paymentMethod.value === 'blik') {
-    // Zbieranie danych do przekazania
-    const phoneNumber = document.getElementById('phone').value; // Numer telefonu
-    const amount = totalAmount; // Kwota
-    const title = `${name}, ${shippingMethod.value}`; // Tytuł przelewu
+        if (paymentMethod.value === 'blik') {
+            // Przekierowanie do strony z informacjami o BLIK
+            const phoneNumber = phone; // Numer telefonu
+            const amount = totalAmount; // Kwota
+            const title = `${name}, ${shippingMethod.value}`; // Tytuł przelewu
 
-    // Przekierowanie do strony z informacjami o BLIK
-    window.location.href = `blik.html?message=${encodeURIComponent(`${phoneNumber}\n${amount}\n${title}`)}`;
-} else {
+            window.location.href = `blik-info.html?message=${encodeURIComponent(`${phoneNumber}\n${amount}\n${title}`)}`;
+        } else {
             // Przekierowanie do strony z podziękowaniem
             window.location.href = "podziękowania.html";
         }
