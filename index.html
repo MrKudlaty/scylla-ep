@@ -213,27 +213,37 @@
         document.querySelectorAll('input[name="shipping"]').forEach((shippingInput) => {
             shippingInput.addEventListener('change', function() {
                 const paczkomatContainer = document.getElementById('paczkomat-container');
+                const payOnDeliveryOption = document.getElementById('pay-on-delivery-option');
+                
                 // Jeśli użytkownik wybierze "Paczkomat", pokaż przycisk do wyboru Paczkomatu
-                paczkomatContainer.style.display = (this.value === 'paczkomat') ? 'block' : 'none';
+                if (this.value === 'paczkomat') {
+                    paczkomatContainer.style.display = 'block';
+                    payOnDeliveryOption.style.display = 'none';
+                } else if (this.value === 'odbiór osobisty') {
+                    payOnDeliveryOption.style.display = 'block';
+                    paczkomatContainer.style.display = 'none';
+                } else {
+                    paczkomatContainer.style.display = 'none';
+                    payOnDeliveryOption.style.display = 'none';
+                }
             });
         });
 
-        // Inicjalizacja widgetu Paczkomatów
-        const openPaczkomatMap = () => {
-            const modal = document.getElementById('map-modal');
-            modal.style.display = 'block';
+        // Zdarzenie kliknięcia na wybór Paczkomatu
+        document.getElementById('choose-paczkomat').addEventListener('click', function() {
+            document.getElementById('map-modal').style.display = 'block';
 
-            const map = new PaczkomatyMapWidget({
-                target: 'map',
-                onPointSelected: function(point) {
-                    document.getElementById('paczkomat-info').textContent = `Wybrano paczkomat: ${point.name}, ${point.address.line1}, ${point.address.line2}`;
-                    modal.style.display = 'none';
+            // Inicjalizacja mapy
+            const map = new GeoWidget.Map('map', {
+                accessToken: 'TOKEN',
+                onLocationSelected: function(location) {
+                    document.getElementById('paczkomat-info').textContent = `Wybrany Paczkomat: ${location.name}`;
+                    document.getElementById('map-modal').style.display = 'none';
                 }
             });
-        };
+        });
 
-        document.getElementById('choose-paczkomat').addEventListener('click', openPaczkomatMap);
-
+        // Zdarzenie zamknięcia modalnego okna mapy
         document.getElementById('close-modal').addEventListener('click', function() {
             document.getElementById('map-modal').style.display = 'none';
         });
@@ -252,16 +262,22 @@
             if (!name) {
                 document.getElementById('name-error').textContent = 'Proszę wprowadzić swoje imię i nazwisko.';
                 valid = false;
+            } else {
+                document.getElementById('name-error').textContent = '';
             }
 
             if (!email) {
                 document.getElementById('email-error').textContent = 'Proszę wprowadzić adres e-mail.';
                 valid = false;
+            } else {
+                document.getElementById('email-error').textContent = '';
             }
 
             if (!paymentMethod) {
                 document.getElementById('payment-error').textContent = 'Proszę wybrać metodę płatności.';
                 valid = false;
+            } else {
+                document.getElementById('payment-error').textContent = '';
             }
 
             if (!shippingMethod) {
@@ -275,7 +291,7 @@
             }
 
             if (valid) {
-                const totalAmount = 29.99 + (shippingMethod.value === 'paczkomat' ? 11.99 : 14.99);
+                const totalAmount = 29.99 + (shippingMethod.value === 'paczkomat' ? 11.99 : shippingMethod.value === 'kurier' ? 14.99 : 0);
                 const orderData = {
                     name: name,
                     email: email,
