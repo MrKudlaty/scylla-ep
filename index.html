@@ -1,4 +1,4 @@
-<!DOCTYPE html>
+ <!DOCTYPE html>
 <html lang="pl">
 <head>
     <meta charset="UTF-8">
@@ -136,11 +136,7 @@
 
             <h3>Wybierz metodę płatności:</h3>
             <label class="radio-label">
-                <input type="radio" id="paypal" name="payment_method" value="paypal" required>
-                PayPal
-            </label>
-            <label class="radio-label" id="pay-on-delivery-option" style="display: none;">
-                <input type="radio" id="pay_on_delivery" name="payment_method" value="płatność przy odbiorze">
+                <input type="radio" id="pay_on_delivery" name="payment_method" value="płatność przy odbiorze" required>
                 Płatność przy odbiorze
             </label>
             <div id="payment-error" class="error-message"></div>
@@ -163,11 +159,11 @@
         </div>
     </div>
 
-    
+    <!-- Firebase JS -->
     <script src="https://www.gstatic.com/firebasejs/8.6.1/firebase-app.js"></script>
     <script src="https://www.gstatic.com/firebasejs/8.6.1/firebase-firestore.js"></script>
+
     <script>
-        
         const firebaseConfig = {
             apiKey: "AIzaSyB8Z6nYHSOV-Fzbp5bQmkuZMM5iN7t2v78",
             authDomain: "scylla-ep.firebaseapp.com",
@@ -178,83 +174,68 @@
             measurementId: "G-QDLSB393PJ"
         };
 
-        
         firebase.initializeApp(firebaseConfig);
         const db = firebase.firestore();
 
-document.querySelectorAll('input[name="shipping"]').forEach((shippingInput) => {
-    shippingInput.addEventListener('change', function() {
-        const payOnDeliveryOption = document.getElementById('pay-on-delivery-option');
-        const paypalOption = document.getElementById('paypal');
+        // Event listener dla przycisku "Kup Teraz"
+        document.getElementById('pay-now').addEventListener('click', function() {
+            // Pobieranie wartości z formularza
+            const name = document.getElementById('name').value.trim();
+            const email = document.getElementById('email').value.trim();
+            const phone = document.getElementById('phone').value.trim();
+            const paymentMethod = document.querySelector('input[name="payment_method"]:checked');
+            const shippingMethod = document.querySelector('input[name="shipping"]:checked');
 
-        // Jeśli użytkownik wybierze "Odbiór osobisty", pokaż "Płatność przy odbiorze" i ukryj PayPal
-        if (this.value === 'odbiór osobisty') {
-            payOnDeliveryOption.style.display = 'block';  // Pokaż "Płatność przy odbiorze"
-            paypalOption.disabled = true;                 // Wyłącz opcję PayPal
-        } else {
-            payOnDeliveryOption.style.display = 'none';   // Ukryj "Płatność przy odbiorze"
-            paypalOption.disabled = false;                // Włącz opcję PayPal
-        }
-    });
-});
+            // Resetowanie komunikatów o błędach
+            document.getElementById('name-error').textContent = '';
+            document.getElementById('email-error').textContent = '';
+            document.getElementById('payment-error').textContent = '';
 
-// Event listener dla przycisku "Kup Teraz"
-document.getElementById('pay-now').addEventListener('click', function() {
-    // Pobieranie wartości z formularza
-    const name = document.getElementById('name').value.trim();
-    const email = document.getElementById('email').value.trim();
-    const phone = document.getElementById('phone').value.trim();
-    const paymentMethod = document.querySelector('input[name="payment_method"]:checked');
-    const shippingMethod = document.querySelector('input[name="shipping"]:checked');
+            // Walidacja
+            let valid = true;
+            if (!name) {
+                document.getElementById('name-error').textContent = 'Proszę wprowadzić swoje imię i nazwisko.';
+                valid = false;
+            }
+            if (!email) {
+                document.getElementById('email-error').textContent = 'Proszę wprowadzić adres e-mail.';
+                valid = false;
+            }
+            if (!paymentMethod) {
+                document.getElementById('payment-error').textContent = 'Proszę wybrać metodę płatności.';
+                valid = false;
+            }
+            if (!shippingMethod) {
+                document.getElementById('shipping-error').textContent = 'Proszę wybrać opcję dostawy.';
+                valid = false;
+            }
 
-    // Resetowanie komunikatów o błędach
-    document.getElementById('name-error').textContent = '';
-    document.getElementById('email-error').textContent = '';
-    document.getElementById('payment-error').textContent = '';
+            if (!valid) return; // Jeśli są błędy, nie wysyłaj formularza
 
-    // Walidacja
-    let valid = true;
-    if (!name) {
-        document.getElementById('name-error').textContent = 'Proszę wprowadzić swoje imię i nazwisko.';
-        valid = false;
-    }
-    if (!email) {
-        document.getElementById('email-error').textContent = 'Proszę wprowadzić adres e-mail.';
-        valid = false;
-    }
-    if (!paymentMethod) {
-        document.getElementById('payment-error').textContent = 'Proszę wybrać metodę płatności.';
-        valid = false;
-    }
-    if (!shippingMethod) {
-        document.getElementById('shipping-error').textContent = 'Proszę wybrać opcję dostawy.';
-        valid = false;
-    }
+            // Zbieranie danych do zamówienia
+            const totalAmount = 29.99 + (shippingMethod.value === 'paczkomat' ? 11.99 : shippingMethod.value === 'kurier' ? 14.99 : 0);
+            const orderData = {
+                name: name,
+                email: email,
+                phone: phone,
+                payment_method: paymentMethod.value,
+                shipping_method: shippingMethod.value,
+                total_amount: totalAmount
+            };
 
-    if (!valid) return; // Jeśli są błędy, nie wysyłaj formularza
-
-    // Zbieranie danych do zamówienia
-    const totalAmount = 29.99 + (shippingMethod.value === 'paczkomat' ? 11.99 : shippingMethod.value === 'kurier' ? 14.99 : 0);
-    const orderData = {
-        name: name,
-        email: email,
-        phone: phone,
-        payment_method: paymentMethod.value,
-        shipping_method: shippingMethod.value,
-        total_amount: totalAmount
-    };
-
-    // Dodawanie zamówienia do Firestore
-    db.collection("orders").add(orderData)
-    .then(() => {
-        // Przekierowanie do strony z podziękowaniem
-        window.location.href = "podziękowania.html";
-    })
-    .catch((error) => {
-        console.error("Błąd przy dodawaniu zamówienia: ", error);
-    });
-});
-
+            // Dodawanie zamówienia do Firestore
+            db.collection("orders").add(orderData)
+            .then(() => {
+                // Przekierowanie na stronę podziękowań tylko przy płatności przy odbiorze
+                if (paymentMethod.value === 'płatność przy odbiorze') {
+                    window.location.href = "podziękowania.html";
+                }
+            })
+            .catch((error) => {
+                console.error("Błąd przy dodawaniu zamówienia: ", error);
+            });
+        });
     </script>
 </body>
 </html>
+
