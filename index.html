@@ -234,8 +234,8 @@
             document.getElementById('map-modal').style.display = 'block';
 
             // Inicjalizacja mapy
-            const map = new GeoWidget.Map('map', {
-                accessToken: 'TOKEN',
+            const map = new EasyPack.Map('map', {
+                searchType: 'parcelLockers',
                 onLocationSelected: function(location) {
                     document.getElementById('paczkomat-info').textContent = `Wybrany Paczkomat: ${location.name}`;
                     document.getElementById('map-modal').style.display = 'none';
