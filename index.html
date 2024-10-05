@@ -108,6 +108,35 @@
                 margin-left: 20px;
             }
         }
+
+        /* Styl dla modalnego okna mapy Paczkomatów */
+        #map-modal {
+            display: none;
+            position: fixed;
+            z-index: 1000;
+            left: 0;
+            top: 0;
+            width: 100%;
+            height: 100%;
+            background-color: rgba(0, 0, 0, 0.5);
+        }
+
+        #map-modal-content {
+            background-color: white;
+            margin: 5% auto;
+            padding: 20px;
+            border: 1px solid #888;
+            width: 80%;
+            height: 80%;
+        }
+
+        #close-modal {
+            color: white;
+            float: right;
+            font-size: 28px;
+            font-weight: bold;
+            cursor: pointer;
+        }
     </style>
     <!-- Skrypt InPost do mapy paczkomatów -->
     <script src="https://geowidget.easypack24.net/js/sdk-for-javascript.js"></script>
@@ -175,10 +204,18 @@
         </div>
     </div>
 
+    <!-- Modal na mapę Paczkomatów -->
+    <div id="map-modal">
+        <div id="map-modal-content">
+            <span id="close-modal">&times;</span>
+            <div id="map" style="width: 100%; height: 100%;"></div>
+        </div>
+    </div>
+
     <script src="https://www.gstatic.com/firebasejs/8.6.1/firebase-app.js"></script>
     <script src="https://www.gstatic.com/firebasejs/8.6.1/firebase-firestore.js"></script>
     <script>
-        
+        // Konfiguracja Firebase
         const firebaseConfig = {
             apiKey: "AIzaSyB8Z6nYHSOV-Fzbp5bQmkuZMM5iN7t2v78",
             authDomain: "scylla-ep.firebaseapp.com",
@@ -189,138 +226,106 @@
             measurementId: "G-QDLSB393PJ"
         };
 
-        
         firebase.initializeApp(firebaseConfig);
         const db = firebase.firestore();
 
-document.querySelectorAll('input[name="shipping"]').forEach((shippingInput) => {
-    shippingInput.addEventListener('change', function() {
-        const payOnDeliveryOption = document.getElementById('pay-on-delivery-option');
-        const paypalOption = document.getElementById('paypal');
-        const paczkomatContainer = document.getElementById('paczkomat-container');
-        
-        // Jeśli użytkownik wybierze "Paczkomat", pokaż przycisk do wyboru paczkomatu
-        if (this.value === 'paczkomat') {
-            paczkomatContainer.style.display = 'block'; // Pokaż przycisk wyboru Paczkomatu
-        } else {
-            paczkomatContainer.style.display = 'none'; // Ukryj przycisk
-        }
+        document.querySelectorAll('input[name="shipping"]').forEach((shippingInput) => {
+            shippingInput.addEventListener('change', function() {
+                const payOnDeliveryOption = document.getElementById('pay-on-delivery-option');
+                const paypalOption = document.getElementById('paypal');
+                const paczkomatContainer = document.getElementById('paczkomat-container');
 
-        // Jeśli użytkownik wybierze "Odbiór osobisty", pokaż "Płatność przy odbiorze" i ukryj PayPal
-        if (this.value === 'odbiór osobisty') {
-            payOnDeliveryOption.style.display = 'block';  // Pokaż "Płatność przy odbiorze"
-            paypalOption.disabled = true;                 // Wyłącz opcję PayPal
-        } else {
-            payOnDeliveryOption.style.display = 'none';   // Ukryj "Płatność przy odbiorze"
-            paypalOption.disabled = false;                // Włącz opcję PayPal
-        }
-    });
-});
+                // Jeśli użytkownik wybierze "Paczkomat", pokaż przycisk do wyboru Paczkomatu
+                if (this.value === 'paczkomat') {
+                    paczkomatContainer.style.display = 'block';
+                } else {
+                    paczkomatContainer.style.display = 'none';
+                }
+            });
+        });
 
-document.getElementById('choose-paczkomat').addEventListener('click', function() {
-    window.easyPack.init({
-        defaultLocale: 'pl',
-        mapType: 'osm',
-        searchType: 'paczkomaty'
-    });
+        // Inicjalizacja widgetu Paczkomatów
+        const openPaczkomatMap = () => {
+            const modal = document.getElementById('map-modal');
+            modal.style.display = 'block';
 
-    window.easyPack.mapWidget('map', function(point) {
-        const paczkomatInfo = `Wybrany Paczkomat: ${point.name}, ${point.address.line1}, ${point.address.line2}`;
-        document.getElementById('paczkomat-info').textContent = paczkomatInfo;
-
-        // Zapisanie wybranego paczkomatu do Firebase
-        const paczkomatData = {
-            name: point.name,
-            address: `${point.address.line1}, ${point.address.line2}`
+            const map = new PaczkomatyMapWidget({
+                target: 'map',
+                onPointSelected: function(point) {
+                    document.getElementById('paczkomat-info').textContent = `Wybrano paczkomat: ${point.name}, ${point.address.line1}, ${point.address.line2}`;
+                    modal.style.display = 'none';
+                }
+            });
         };
 
-        db.collection('orders').doc('current_order').update({
-            paczkomat: paczkomatData
-        }).then(() => {
-            console.log('Paczkomat zapisany.');
-        }).catch(error => {
-            console.error('Błąd przy zapisie paczkomatu: ', error);
+        document.getElementById('choose-paczkomat').addEventListener('click', openPaczkomatMap);
+
+        document.getElementById('close-modal').addEventListener('click', function() {
+            document.getElementById('map-modal').style.display = 'none';
         });
-    });
-});
 
-// Event listener dla przycisku "Kup Teraz"
-document.getElementById('pay-now').addEventListener('click', function() {
-    // Pobieranie wartości z formularza
-    const name = document.getElementById('name').value.trim();
-    const email = document.getElementById('email').value.trim();
-    const phone = document.getElementById('phone').value.trim();
-    const paymentMethod = document.querySelector('input[name="payment_method"]:checked');
-    const shippingMethod = document.querySelector('input[name="shipping"]:checked');
-    const paczkomatInfo = document.getElementById('paczkomat-info').textContent;
+        // Zatwierdzenie zamówienia
+        document.getElementById('pay-now').addEventListener('click', function() {
+            const name = document.getElementById('name').value.trim();
+            const email = document.getElementById('email').value.trim();
+            const phone = document.getElementById('phone').value.trim();
+            const paymentMethod = document.querySelector('input[name="payment_method"]:checked');
+            const shippingMethod = document.querySelector('input[name="shipping"]:checked');
+            const paczkomatInfo = document.getElementById('paczkomat-info').textContent;
 
-    // Resetowanie komunikatów o błędach
-    document.getElementById('name-error').textContent = '';
-    document.getElementById('email-error').textContent = '';
-    document.getElementById('payment-error').textContent = '';
+            let valid = true;
 
-    // Walidacja
-    let valid = true;
-    if (!name) {
-        document.getElementById('name-error').textContent = 'Proszę wprowadzić swoje imię i nazwisko.';
-        valid = false;
-    }
-    if (!email) {
-        document.getElementById('email-error').textContent = 'Proszę wprowadzić adres e-mail.';
-        valid = false;
-    }
-    if (!paymentMethod) {
-        document.getElementById('payment-error').textContent = 'Proszę wybrać metodę płatności.';
-        valid = false;
-    }
-    if (!shippingMethod) {
-        document.getElementById('shipping-error').textContent = 'Proszę wybrać opcję dostawy.';
-        valid = false;
-    }
-    if (shippingMethod.value === 'paczkomat' && !paczkomatInfo) {
-        alert('Proszę wybrać Paczkomat.');
-        valid = false;
-    }
+            if (!name) {
+                document.getElementById('name-error').textContent = 'Proszę wprowadzić swoje imię i nazwisko.';
+                valid = false;
+            }
 
-    if (!valid) return; // Jeśli są błędy, nie wysyłaj formularza
+            if (!email) {
+                document.getElementById('email-error').textContent = 'Proszę wprowadzić adres e-mail.';
+                valid = false;
+            }
 
-    // Zbieranie danych do zamówienia
-    const totalAmount = 29.99 + (shippingMethod.value === 'paczkomat' ? 11.99 : shippingMethod.value === 'kurier' ? 14.99 : 0);
-    const orderData = {
-        name: name,
-        email: email,
-        phone: phone,
-        payment_method: paymentMethod.value,
-        shipping_method: shippingMethod.value,
-        total_amount: totalAmount,
-        paczkomat: paczkomatInfo || null
-    };
+            if (!paymentMethod) {
+                document.getElementById('payment-error').textContent = 'Proszę wybrać metodę płatności.';
+                valid = false;
+            }
 
-    // Dodawanie zamówienia do Firestore
-    db.collection("orders").add(orderData)
-    .then(() => {
-        if (paymentMethod.value === 'blik') {
-            // Przekierowanie do strony z informacjami o BLIK
-            const phoneNumber = phone ? phone : 'Brak numeru telefonu'; // Numer telefonu lub komunikat
-            const amount = totalAmount; // Kwota
-            const title = `${name}, ${shippingMethod.value}`; // Tytuł przelewu
+            if (!shippingMethod) {
+                alert('Proszę wybrać metodę dostawy.');
+                valid = false;
+            }
 
-            // Przekierowanie na stronę BLIK z odpowiednimi parametrami
-            window.location.href = `blik.html?message=${encodeURIComponent(`Numer telefonu: ${phoneNumber}\nKwota: ${amount} PLN\nTytuł przelewu: ${title}`)}`;
-        } else if (paymentMethod.value === 'paypal') {
-            // Przekierowanie do strony płatności PayPal
-            const paypalUrl = `https://www.paypal.com/cgi-bin/webscr?cmd=_xclick&business=mrkudlaty2006@gmail.com&item_name=SCYLLA+EP&amount=${totalAmount}&currency_code=PLN`;
-            window.location.href = paypalUrl;
-        } else {
-            // Przekierowanie do strony z podziękowaniem
-            window.location.href = "podziękowania.html";
-        }
-    })
-    .catch((error) => {
-        console.error("Błąd przy dodawaniu zamówienia: ", error);
-    });
-});
+            if (shippingMethod.value === 'paczkomat' && !paczkomatInfo) {
+                alert('Proszę wybrać Paczkomat.');
+                valid = false;
+            }
 
+            if (valid) {
+                const totalAmount = 29.99 + (shippingMethod.value === 'paczkomat' ? 11.99 : 14.99);
+                const orderData = {
+                    name: name,
+                    email: email,
+                    phone: phone,
+                    payment_method: paymentMethod.value,
+                    shipping_method: shippingMethod.value,
+                    paczkomat: paczkomatInfo || null,
+                    total_amount: totalAmount
+                };
+
+                db.collection("orders").add(orderData).then(() => {
+                    if (paymentMethod.value === 'blik') {
+                        window.location.href = `blik.html?message=${encodeURIComponent(`Numer telefonu: ${phone || 'Brak numeru telefonu'}\nKwota: ${totalAmount} PLN\nTytuł przelewu: ${name}, ${shippingMethod.value}`)}`;
+                    } else if (paymentMethod.value === 'paypal') {
+                        const paypalUrl = `https://www.paypal.com/cgi-bin/webscr?cmd=_xclick&business=mrkudlaty2006@gmail.com&item_name=SCYLLA+EP&amount=${totalAmount}&currency_code=PLN`;
+                        window.location.href = paypalUrl;
+                    } else {
+                        window.location.href = "podziekowania.html";
+                    }
+                }).catch((error) => {
+                    console.error("Błąd przy dodawaniu zamówienia: ", error);
+                });
+            }
+        });
     </script>
 </body>
 </html>
