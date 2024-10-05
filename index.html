@@ -120,7 +120,7 @@
             cursor: pointer;
         }
     </style>
-    <script src="https://geowidget.easypack24.net/js/sdk-for-javascript.js"></script>
+    <script src="https://geowidget.easypack24.net/js/sdk-for-javascript.js" async></script>
     <script src="https://www.gstatic.com/firebasejs/8.6.1/firebase-app.js"></script>
     <script src="https://www.gstatic.com/firebasejs/8.6.1/firebase-firestore.js"></script>
 </head>
@@ -230,21 +230,29 @@
         });
 
         // Zdarzenie kliknięcia na wybór Paczkomatu
-        document.getElementById('choose-paczkomat').addEventListener('click', function() {
+       document.getElementById('choose-paczkomat').addEventListener('click', function() {
     const modal = document.getElementById('map-modal');
     modal.style.display = 'block';
 
+    // Oczyszczenie zawartości mapy przed ponownym renderowaniem
     const mapElement = document.getElementById('map');
-    mapElement.innerHTML = ''; // Czyści poprzednią mapę
+    mapElement.innerHTML = ''; // Czyszczenie poprzedniej zawartości mapy
 
-    const map = new PaczkomatyMapWidget({
-        target: 'map',
-        onPointSelected: function(point) {
-            document.getElementById('paczkomat-info').textContent = `Wybrano paczkomat: ${point.name}, ${point.address.line1}, ${point.address.line2}`;
-            modal.style.display = 'none'; // Zamknięcie modala po wyborze paczkomatu
-        }
+    // Użycie EasyPack do inicjalizacji mapy Paczkomatów
+    EasyPack.init({
+        mapType: 'osm'  // Można zmienić na 'google' jeśli potrzebujesz map Google
+    });
+
+    EasyPack.mapWidget('map', function(point) {
+        document.getElementById('paczkomat-info').textContent = `Wybrano paczkomat: ${point.name}, ${point.address.line1}, ${point.address.line2}`;
+        modal.style.display = 'none'; // Zamknięcie modala po wyborze paczkomatu
     });
 });
+
+document.getElementById('close-modal').addEventListener('click', function() {
+    document.getElementById('map-modal').style.display = 'none';
+});
+
             // Inicjalizacja mapy
             const map = new EasyPack.Map('map', {
                 searchType: 'parcelLockers',
