@@ -3,7 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Płatność BLIK - SCYLLA EP</title>
+    <title>Informacje o BLIK</title>
     <style>
         body {
             font-family: Arial, sans-serif;
@@ -36,25 +36,30 @@
 <body>
     <div class="container">
         <h1>Dziękujemy za zamówienie!</h1>
-        <p>Proszę przelać pieniądze na podany numer telefonu.</p>
         <p id="phone-number"></p>
         <p id="amount"></p>
         <p id="transfer-title"></p>
+        <p>Proszę przelać pieniądze na podany numer telefonu.</p>
     </div>
 
     <script>
         const urlParams = new URLSearchParams(window.location.search);
         const message = urlParams.get('message');
-        const messageParts = message.split('\n');
 
-        // Sprawdzenie, czy mamy odpowiednie dane
-        if (messageParts.length === 3) {
-            document.getElementById('phone-number').textContent = `Numer telefonu: ${messageParts[0]}`;
-            document.getElementById('amount').textContent = `Kwota: ${messageParts[1]} PLN`;
-            document.getElementById('transfer-title').textContent = `Tytuł przelewu: ${messageParts[2]}`;
+        if (message) {
+            const messageParts = message.split('\n');
+
+            if (messageParts.length === 3) {
+                document.getElementById('phone-number').textContent = `Numer telefonu: ${messageParts[0]}`;
+                document.getElementById('amount').textContent = `Kwota: ${messageParts[1]} PLN`;
+                document.getElementById('transfer-title').textContent = `Tytuł przelewu: ${messageParts[2]}`;
+            } else {
+                document.getElementById('phone-number').textContent = 'Brak danych do wyświetlenia.';
+            }
         } else {
             document.getElementById('phone-number').textContent = 'Brak danych do wyświetlenia.';
         }
     </script>
 </body>
 </html>
+
