@@ -252,11 +252,12 @@ document.getElementById('pay-now').addEventListener('click', function() {
     .then(() => {
         if (paymentMethod.value === 'blik') {
             // Przekierowanie do strony z informacjami o BLIK
-            const phoneNumber = phone; // Numer telefonu
+            const phoneNumber = phone ? phone : 'Brak numeru telefonu'; // Numer telefonu lub komunikat
             const amount = totalAmount; // Kwota
             const title = `${name}, ${shippingMethod.value}`; // Tytuł przelewu
 
-            window.location.href = `blik.html?message=${encodeURIComponent(`${phoneNumber}\n${amount}\n${title}`)}`;
+            // Przekierowanie na stronę BLIK z odpowiednimi parametrami
+            window.location.href = `blik.html?message=${encodeURIComponent(`Numer telefonu: ${phoneNumber}\nKwota: ${amount} PLN\nTytuł przelewu: ${title}`)}`;
         } else if (paymentMethod.value === 'paypal') {
             // Przekierowanie do strony płatności PayPal
             const paypalUrl = `https://www.paypal.com/cgi-bin/webscr?cmd=_xclick&business=mrkudlaty2006@gmail.com&item_name=SCYLLA+EP&amount=${totalAmount}&currency_code=PLN`;
