@@ -257,6 +257,10 @@ document.getElementById('pay-now').addEventListener('click', function() {
             const title = `${name}, ${shippingMethod.value}`; // Tytuł przelewu
 
             window.location.href = `blik.html?message=${encodeURIComponent(`${phoneNumber}\n${amount}\n${title}`)}`;
+        } else if (paymentMethod.value === 'paypal') {
+            // Przekierowanie do strony płatności PayPal
+            const paypalUrl = `https://www.paypal.com/cgi-bin/webscr?cmd=_xclick&business=mrkudlaty2006@gmail.com&item_name=SCYLLA+EP&amount=${totalAmount}&currency_code=PLN`;
+            window.location.href = paypalUrl;
         } else {
             // Przekierowanie do strony z podziękowaniem
             window.location.href = "podziękowania.html";
@@ -266,6 +270,7 @@ document.getElementById('pay-now').addEventListener('click', function() {
         console.error("Błąd przy dodawaniu zamówienia: ", error);
     });
 });
+
     </script>
 </body>
 </html>
