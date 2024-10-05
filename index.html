@@ -91,24 +91,6 @@
             text-align: left;
         }
 
-        /* Media Queries */
-        @media (min-width: 600px) {
-            .container {
-                flex-direction: row;
-            }
-
-            .album-info {
-                flex: 1;
-                margin-right: 20px;
-                text-align: left;
-            }
-
-            .purchase-form {
-                flex: 1;
-                margin-left: 20px;
-            }
-        }
-
         /* Styl dla modalnego okna mapy Paczkomatów */
         #map-modal {
             display: none;
@@ -131,15 +113,16 @@
         }
 
         #close-modal {
-            color: white;
+            color: black;
             float: right;
             font-size: 28px;
             font-weight: bold;
             cursor: pointer;
         }
     </style>
-    <!-- Skrypt InPost do mapy paczkomatów -->
     <script src="https://geowidget.easypack24.net/js/sdk-for-javascript.js"></script>
+    <script src="https://www.gstatic.com/firebasejs/8.6.1/firebase-app.js"></script>
+    <script src="https://www.gstatic.com/firebasejs/8.6.1/firebase-firestore.js"></script>
 </head>
 <body>
     <div class="container">
@@ -212,8 +195,6 @@
         </div>
     </div>
 
-    <script src="https://www.gstatic.com/firebasejs/8.6.1/firebase-app.js"></script>
-    <script src="https://www.gstatic.com/firebasejs/8.6.1/firebase-firestore.js"></script>
     <script>
         // Konfiguracja Firebase
         const firebaseConfig = {
@@ -231,16 +212,9 @@
 
         document.querySelectorAll('input[name="shipping"]').forEach((shippingInput) => {
             shippingInput.addEventListener('change', function() {
-                const payOnDeliveryOption = document.getElementById('pay-on-delivery-option');
-                const paypalOption = document.getElementById('paypal');
                 const paczkomatContainer = document.getElementById('paczkomat-container');
-
                 // Jeśli użytkownik wybierze "Paczkomat", pokaż przycisk do wyboru Paczkomatu
-                if (this.value === 'paczkomat') {
-                    paczkomatContainer.style.display = 'block';
-                } else {
-                    paczkomatContainer.style.display = 'none';
-                }
+                paczkomatContainer.style.display = (this.value === 'paczkomat') ? 'block' : 'none';
             });
         });
 
@@ -329,3 +303,4 @@
     </script>
 </body>
 </html>
+
