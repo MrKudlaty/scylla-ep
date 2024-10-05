@@ -163,11 +163,9 @@
         </div>
     </div>
 
-    
-    <script src="https://www.gstatic.com/firebasejs/8.6.1/firebase-app.js"></script>
+        <script src="https://www.gstatic.com/firebasejs/8.6.1/firebase-app.js"></script>
     <script src="https://www.gstatic.com/firebasejs/8.6.1/firebase-firestore.js"></script>
     <script>
-        
         const firebaseConfig = {
             apiKey: "AIzaSyB8Z6nYHSOV-Fzbp5bQmkuZMM5iN7t2v78",
             authDomain: "scylla-ep.firebaseapp.com",
@@ -232,6 +230,17 @@
 
             // Całkowita kwota do zapłaty
             const totalAmount = basePrice + shippingCost;
+
+            // Debugging: Logowanie do konsoli
+            console.log("Nazwa:", name);
+            console.log("E-mail:", email);
+            console.log("Telefon:", phone);
+            console.log("Metoda płatności:", paymentMethod.value);
+            console.log("Metoda dostawy:", shippingMethod.value);
+            console.log("Koszt wysyłki:", shippingCost);
+            console.log("Cena płyty:", basePrice);
+            console.log("Całkowita kwota:", totalAmount);
+
             const orderData = {
                 name: name,
                 email: email,
@@ -249,9 +258,12 @@
                     window.location.href = "podziękowania.html";
                 } else if (paymentMethod.value === 'paypal') {
                     // Przekierowanie do strony PayPal z całkowitą kwotą
-                    const paypalUrl = `https://www.paypal.com/cgi-bin/webscr?cmd=_xclick&business=mrkudlaty2006@gmail.com&item_name=SCYLLA EP&amount=${totalAmount.toFixed(2)}&currency_code=PLN`;
+                    const paypalUrl = `https://www.paypal.com/cgi-bin/webscr?cmd=_xclick&business=your_paypal_email@example.com&item_name=SCYLLA EP&amount=${totalAmount.toFixed(2)}&currency_code=PLN`;
+                    console.log("Link PayPal:", paypalUrl); // Logowanie linku PayPal
                     window.location.href = paypalUrl;
-                } 
+                } else {
+                    alert("Zamówienie zostało przyjęte. Sprawdź swoją skrzynkę e-mail.");
+                }
             })
             .catch((error) => {
                 console.error("Błąd przy dodawaniu zamówienia: ", error);
@@ -260,3 +272,4 @@
     </script>
 </body>
 </html>
+    
