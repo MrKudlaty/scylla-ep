@@ -173,94 +173,90 @@
             authDomain: "scylla-ep.firebaseapp.com",
             projectId: "scylla-ep",
             storageBucket: "scylla-ep.appspot.com",
-            messagingSenderId: "786465617342",
-            appId: "1:786465617342:web:728fbd76d10424c35435ef",
-            measurementId: "G-QDLSB393PJ"
+            messagingSenderId: "167056711157",
+            appId: "1:167056711157:web:90f973c299b795ed891de0"
         };
 
-        
+        // Inicjalizacja Firebase
         firebase.initializeApp(firebaseConfig);
         const db = firebase.firestore();
 
-document.querySelectorAll('input[name="shipping"]').forEach((shippingInput) => {
-    shippingInput.addEventListener('change', function() {
-        const payOnDeliveryOption = document.getElementById('pay-on-delivery-option');
-        const paypalOption = document.getElementById('paypal');
+        // Przechwytywanie zdarzenia kliknięcia przycisku "Kup Teraz"
+        document.getElementById("pay-now").addEventListener("click", function () {
+            const name = document.getElementById("name").value;
+            const email = document.getElementById("email").value;
+            const phone = document.getElementById("phone").value;
+            const paymentMethod = document.querySelector('input[name="payment_method"]:checked');
+            const shippingMethod = document.querySelector('input[name="shipping"]:checked');
 
-        // Jeśli użytkownik wybierze "Odbiór osobisty", pokaż "Płatność przy odbiorze" i ukryj PayPal
-        if (this.value === 'odbiór osobisty') {
-            payOnDeliveryOption.style.display = 'block';  // Pokaż "Płatność przy odbiorze"
-            paypalOption.disabled = true;                 // Wyłącz opcję PayPal
-        } else {
-            payOnDeliveryOption.style.display = 'none';   // Ukryj "Płatność przy odbiorze"
-            paypalOption.disabled = false;                // Włącz opcję PayPal
-        }
-    });
-});
+            // Walidacja formularza
+            let valid = true;
+            if (!name) {
+                document.getElementById("name-error").innerText = "Imię i nazwisko są wymagane.";
+                valid = false;
+            } else {
+                document.getElementById("name-error").innerText = "";
+            }
 
-// Event listener dla przycisku "Kup Teraz"
-document.getElementById('pay-now').addEventListener('click', function() {
-    // Pobieranie wartości z formularza
-    const name = document.getElementById('name').value.trim();
-    const email = document.getElementById('email').value.trim();
-    const phone = document.getElementById('phone').value.trim();
-    const paymentMethod = document.querySelector('input[name="payment_method"]:checked');
-    const shippingMethod = document.querySelector('input[name="shipping"]:checked');
+            if (!email) {
+                document.getElementById("email-error").innerText = "Adres e-mail jest wymagany.";
+                valid = false;
+            } else {
+                document.getElementById("email-error").innerText = "";
+            }
 
-    // Resetowanie komunikatów o błędach
-    document.getElementById('name-error').textContent = '';
-    document.getElementById('email-error').textContent = '';
-    document.getElementById('payment-error').textContent = '';
+            if (!paymentMethod) {
+                document.getElementById("payment-error").innerText = "Wybierz metodę płatności.";
+                valid = false;
+            } else {
+                document.getElementById("payment-error").innerText = "";
+            }
 
-    // Walidacja
-    let valid = true;
-    if (!name) {
-        document.getElementById('name-error').textContent = 'Proszę wprowadzić swoje imię i nazwisko.';
-        valid = false;
-    }
-    if (!email) {
-        document.getElementById('email-error').textContent = 'Proszę wprowadzić adres e-mail.';
-        valid = false;
-    }
-    if (!paymentMethod) {
-        document.getElementById('payment-error').textContent = 'Proszę wybrać metodę płatności.';
-        valid = false;
-    }
-    if (!shippingMethod) {
-        document.getElementById('shipping-error').textContent = 'Proszę wybrać opcję dostawy.';
-        valid = false;
-    }
+            if (!shippingMethod) {
+                alert("Wybierz metodę dostawy.");
+                valid = false;
+            }
 
-    if (!valid) return; // Jeśli są błędy, nie wysyłaj formularza
+            if (!valid) return; // Jeśli są błędy, nie wysyłaj formularza
 
-    // Zbieranie danych do zamówienia
-    const totalAmount = 29.99 + (shippingMethod.value === 'paczkomat' ? 11.99 : shippingMethod.value === 'kurier' ? 14.99 : 0);
-    const orderData = {
-        name: name,
-        email: email,
-        phone: phone,
-        payment_method: paymentMethod.value,
-        shipping_method: shippingMethod.value,
-        total_amount: totalAmount
-    };
+            // Zbieranie danych do zamówienia
+            const basePrice = 29.99; // Cena płyty
+            let shippingCost = 0; // Koszt wysyłki
 
-    // Dodawanie zamówienia do Firestore
-    db.collection("orders").add(orderData)
-    .then(() => {
-   if (shippingMethod.value === 'odbiór osobisty') {
-            window.location.href = "podziękowania.html";
-        } else if (paymentMethod.value === 'paypal') {
-            // Przekierowanie do strony PayPal (dodaj tutaj odpowiedni URL PayPal)
-            const paypalUrl = "https://www.paypal.com/cgi-bin/webscr?cmd=_xclick&business=mrkudlaty2006@gmail.com&item_name=SCYLLA EP&amount=29.99&currency_code=PLN";
-            window.location.href = paypalUrl;
-        }
-    })
-    .catch((error) => {
-        console.error("Błąd przy dodawaniu zamówienia: ", error);
-    });
-});
+            // Oblicz koszt wysyłki w zależności od wybranej metody
+            if (shippingMethod.value === 'paczkomat') {
+                shippingCost = 11.99;
+            } else if (shippingMethod.value === 'kurier') {
+                shippingCost = 14.99;
+            }
 
+            // Całkowita kwota do zapłaty
+            const totalAmount = basePrice + shippingCost;
+            const orderData = {
+                name: name,
+                email: email,
+                phone: phone,
+                payment_method: paymentMethod.value,
+                shipping_method: shippingMethod.value,
+                total_amount: totalAmount
+            };
 
+            // Dodawanie zamówienia do Firestore
+            db.collection("orders").add(orderData)
+            .then(() => {
+                // Przekierowanie do strony z podziękowaniem tylko dla odbioru osobistego
+                if (shippingMethod.value === 'odbiór osobisty') {
+                    window.location.href = "podziękowania.html";
+                } else if (paymentMethod.value === 'paypal') {
+                    // Przekierowanie do strony PayPal z całkowitą kwotą
+                    const paypalUrl = `https://www.paypal.com/cgi-bin/webscr?cmd=_xclick&business=your_paypal_email@example.com&item_name=SCYLLA EP&amount=${totalAmount.toFixed(2)}&currency_code=PLN`;
+                    window.location.href = paypalUrl;
+                } 
+            })
+            .catch((error) => {
+                console.error("Błąd przy dodawaniu zamówienia: ", error);
+            });
+        });
     </script>
 </body>
 </html>
