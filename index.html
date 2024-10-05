@@ -110,7 +110,7 @@
         }
 
         /* Styl dla modalnego okna mapy Paczkomatów */
-        #map-modal {
+      #map-modal {
             display: none;
             position: fixed;
             z-index: 1000;
@@ -128,14 +128,25 @@
             border: 1px solid #888;
             width: 80%;
             height: 80%;
+            display: flex;
+            justify-content: center;
+            align-items: center;
         }
 
         #close-modal {
-            color: white;
+            color: black;
             float: right;
             font-size: 28px;
             font-weight: bold;
             cursor: pointer;
+            position: absolute;
+            top: 10px;
+            right: 20px;
+        }
+
+        #map {
+            width: 100%;
+            height: 100%;
         }
     </style>
     <!-- Skrypt InPost do mapy paczkomatów -->
@@ -205,12 +216,15 @@
     </div>
 
     <!-- Modal na mapę Paczkomatów -->
-    <div id="map-modal">
+       <div id="map-modal">
         <div id="map-modal-content">
             <span id="close-modal">&times;</span>
-            <div id="map" style="width: 100%; height: 100%;"></div>
+            <div id="map"></div>
         </div>
     </div>
+
+    <button id="choose-paczkomat" class="buy-btn">Wybierz Paczkomat</button>
+    <div id="paczkomat-info" style="margin-top: 10px;"></div>
 
     <script src="https://www.gstatic.com/firebasejs/8.6.1/firebase-app.js"></script>
     <script src="https://www.gstatic.com/firebasejs/8.6.1/firebase-firestore.js"></script>
@@ -245,14 +259,18 @@
         });
 
         // Inicjalizacja widgetu Paczkomatów
-        const openPaczkomatMap = () => {
+       const openPaczkomatMap = () => {
             const modal = document.getElementById('map-modal');
             modal.style.display = 'block';
 
+            // Inicjalizacja mapy Paczkomatów
             const map = new PaczkomatyMapWidget({
                 target: 'map',
+                apiKey: 'wyprowadź-api-key', // opcjonalne, jeśli wymaga API
+                mapType: 'osm', // opcja dla mapy OpenStreetMap
                 onPointSelected: function(point) {
-                    document.getElementById('paczkomat-info').textContent = Wybrano paczkomat: ${point.name}, ${point.address.line1}, ${point.address.line2};
+                    // Po wybraniu paczkomatu
+                    document.getElementById('paczkomat-info').textContent = `Wybrano paczkomat: ${point.name}, ${point.address.line1}, ${point.address.line2}`;
                     modal.style.display = 'none';
                 }
             });
