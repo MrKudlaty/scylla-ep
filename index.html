@@ -256,7 +256,7 @@ document.getElementById('pay-now').addEventListener('click', function() {
             const amount = totalAmount; // Kwota
             const title = `${name}, ${shippingMethod.value}`; // Tytuł przelewu
 
-            window.location.href = `blik-info.html?message=${encodeURIComponent(`${phoneNumber}\n${amount}\n${title}`)}`;
+            window.location.href = `blik.html?message=${encodeURIComponent(`${phoneNumber}\n${amount}\n${title}`)}`;
         } else {
             // Przekierowanie do strony z podziękowaniem
             window.location.href = "podziękowania.html";
