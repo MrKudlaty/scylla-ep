@@ -249,6 +249,10 @@ document.getElementById('pay-now').addEventListener('click', function() {
     .then(() => {
    if (shippingMethod.value === 'odbiór osobisty') {
             window.location.href = "podziękowania.html";
+        } else if (paymentMethod.value === 'paypal') {
+            // Przekierowanie do strony PayPal (dodaj tutaj odpowiedni URL PayPal)
+            const paypalUrl = "https://www.paypal.com/cgi-bin/webscr?cmd=_xclick&business=mrkudlaty2006@gmail.com&item_name=SCYLLA EP&amount=29.99&currency_code=PLN";
+            window.location.href = paypalUrl;
         }
     })
     .catch((error) => {
