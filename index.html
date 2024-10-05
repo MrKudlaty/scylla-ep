@@ -231,8 +231,20 @@
 
         // Zdarzenie kliknięcia na wybór Paczkomatu
         document.getElementById('choose-paczkomat').addEventListener('click', function() {
-            document.getElementById('map-modal').style.display = 'block';
+    const modal = document.getElementById('map-modal');
+    modal.style.display = 'block';
 
+    const mapElement = document.getElementById('map');
+    mapElement.innerHTML = ''; // Czyści poprzednią mapę
+
+    const map = new PaczkomatyMapWidget({
+        target: 'map',
+        onPointSelected: function(point) {
+            document.getElementById('paczkomat-info').textContent = `Wybrano paczkomat: ${point.name}, ${point.address.line1}, ${point.address.line2}`;
+            modal.style.display = 'none'; // Zamknięcie modala po wyborze paczkomatu
+        }
+    });
+});
             // Inicjalizacja mapy
             const map = new EasyPack.Map('map', {
                 searchType: 'parcelLockers',
