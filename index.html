@@ -109,6 +109,8 @@
             }
         }
     </style>
+    <!-- Skrypt InPost do mapy paczkomatów -->
+    <script src="https://geowidget.easypack24.net/js/sdk-for-javascript.js"></script>
 </head>
 <body>
     <div class="container">
@@ -163,6 +165,12 @@
                 Odbiór osobisty (0 PLN)
             </label>
 
+            <!-- Sekcja wyboru paczkomatu -->
+            <div id="paczkomat-container" style="display:none;">
+                <button id="choose-paczkomat" class="buy-btn">Wybierz Paczkomat</button>
+                <div id="paczkomat-info" style="margin-top: 10px;"></div>
+            </div>
+
             <button id="pay-now" type="button" class="buy-btn">Kup Teraz</button>
         </div>
     </div>
@@ -189,6 +197,14 @@ document.querySelectorAll('input[name="shipping"]').forEach((shippingInput) => {
     shippingInput.addEventListener('change', function() {
         const payOnDeliveryOption = document.getElementById('pay-on-delivery-option');
         const paypalOption = document.getElementById('paypal');
+        const paczkomatContainer = document.getElementById('paczkomat-container');
+        
+        // Jeśli użytkownik wybierze "Paczkomat", pokaż przycisk do wyboru paczkomatu
+        if (this.value === 'paczkomat') {
+            paczkomatContainer.style.display = 'block'; // Pokaż przycisk wyboru Paczkomatu
+        } else {
+            paczkomatContainer.style.display = 'none'; // Ukryj przycisk
+        }
 
         // Jeśli użytkownik wybierze "Odbiór osobisty", pokaż "Płatność przy odbiorze" i ukryj PayPal
         if (this.value === 'odbiór osobisty') {
@@ -201,7 +217,34 @@ document.querySelectorAll('input[name="shipping"]').forEach((shippingInput) => {
     });
 });
 
-        // Event listener dla przycisku "Kup Teraz"
+document.getElementById('choose-paczkomat').addEventListener('click', function() {
+    window.easyPack.init({
+        defaultLocale: 'pl',
+        mapType: 'osm',
+        searchType: 'paczkomaty'
+    });
+
+    window.easyPack.mapWidget('map', function(point) {
+        const paczkomatInfo = `Wybrany Paczkomat: ${point.name}, ${point.address.line1}, ${point.address.line2}`;
+        document.getElementById('paczkomat-info').textContent = paczkomatInfo;
+
+        // Zapisanie wybranego paczkomatu do Firebase
+        const paczkomatData = {
+            name: point.name,
+            address: `${point.address.line1}, ${point.address.line2}`
+        };
+
+        db.collection('orders').doc('current_order').update({
+            paczkomat: paczkomatData
+        }).then(() => {
+            console.log('Paczkomat zapisany.');
+        }).catch(error => {
+            console.error('Błąd przy zapisie paczkomatu: ', error);
+        });
+    });
+});
+
+// Event listener dla przycisku "Kup Teraz"
 document.getElementById('pay-now').addEventListener('click', function() {
     // Pobieranie wartości z formularza
     const name = document.getElementById('name').value.trim();
@@ -209,6 +252,7 @@ document.getElementById('pay-now').addEventListener('click', function() {
     const phone = document.getElementById('phone').value.trim();
     const paymentMethod = document.querySelector('input[name="payment_method"]:checked');
     const shippingMethod = document.querySelector('input[name="shipping"]:checked');
+    const paczkomatInfo = document.getElementById('paczkomat-info').textContent;
 
     // Resetowanie komunikatów o błędach
     document.getElementById('name-error').textContent = '';
@@ -233,6 +277,10 @@ document.getElementById('pay-now').addEventListener('click', function() {
         document.getElementById('shipping-error').textContent = 'Proszę wybrać opcję dostawy.';
         valid = false;
     }
+    if (shippingMethod.value === 'paczkomat' && !paczkomatInfo) {
+        alert('Proszę wybrać Paczkomat.');
+        valid = false;
+    }
 
     if (!valid) return; // Jeśli są błędy, nie wysyłaj formularza
 
@@ -244,7 +292,8 @@ document.getElementById('pay-now').addEventListener('click', function() {
         phone: phone,
         payment_method: paymentMethod.value,
         shipping_method: shippingMethod.value,
-        total_amount: totalAmount
+        total_amount: totalAmount,
+        paczkomat: paczkomatInfo || null
     };
 
     // Dodawanie zamówienia do Firestore
