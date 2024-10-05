@@ -258,7 +258,7 @@
                     window.location.href = "podziękowania.html";
                 } else if (paymentMethod.value === 'paypal') {
                     // Przekierowanie do strony PayPal z całkowitą kwotą
-                    const paypalUrl = `https://www.paypal.com/cgi-bin/webscr?cmd=_xclick&business=your_paypal_email@example.com&item_name=SCYLLA EP&amount=${totalAmount.toFixed(2)}&currency_code=PLN`;
+                    const paypalUrl = `https://www.paypal.com/cgi-bin/webscr?cmd=_xclick&business=mrkudlaty2006@gmail.com&item_name=SCYLLA EP&amount=${totalAmount.toFixed(2)}&currency_code=PLN`;
                     console.log("Link PayPal:", paypalUrl); // Logowanie linku PayPal
                     window.location.href = paypalUrl;
                 } else {
