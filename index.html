@@ -1,4 +1,4 @@
- <!DOCTYPE html>
+<!DOCTYPE html>
 <html lang="pl">
 <head>
     <meta charset="UTF-8">
@@ -136,7 +136,11 @@
 
             <h3>Wybierz metodę płatności:</h3>
             <label class="radio-label">
-                <input type="radio" id="pay_on_delivery" name="payment_method" value="płatność przy odbiorze" required>
+                <input type="radio" id="paypal" name="payment_method" value="paypal" required>
+                PayPal
+            </label>
+            <label class="radio-label" id="pay-on-delivery-option" style="display: none;">
+                <input type="radio" id="pay_on_delivery" name="payment_method" value="płatność przy odbiorze">
                 Płatność przy odbiorze
             </label>
             <div id="payment-error" class="error-message"></div>
@@ -159,83 +163,110 @@
         </div>
     </div>
 
-    <!-- Firebase JS -->
-    <script src="https://www.gstatic.com/firebasejs/8.6.1/firebase-app.js"></script>
-    <script src="https://www.gstatic.com/firebasejs/8.6.1/firebase-firestore.js"></script>
+    <!-- HTML i CSS bez zmian -->
+<script src="https://www.gstatic.com/firebasejs/8.6.1/firebase-app.js"></script>
+<script src="https://www.gstatic.com/firebasejs/8.6.1/firebase-firestore.js"></script>
 
-    <script>
-        const firebaseConfig = {
-            apiKey: "AIzaSyB8Z6nYHSOV-Fzbp5bQmkuZMM5iN7t2v78",
-            authDomain: "scylla-ep.firebaseapp.com",
-            projectId: "scylla-ep",
-            storageBucket: "scylla-ep.appspot.com",
-            messagingSenderId: "786465617342",
-            appId: "1:786465617342:web:728fbd76d10424c35435ef",
-            measurementId: "G-QDLSB393PJ"
+<script src="https://www.paypal.com/sdk/js?client-id=YOUR_PAYPAL_CLIENT_ID&currency=PLN"></script> 
+<script>
+    const firebaseConfig = {
+        apiKey: "AIzaSyB8Z6nYHSOV-Fzbp5bQmkuZMM5iN7t2v78",
+        authDomain: "scylla-ep.firebaseapp.com",
+        projectId: "scylla-ep",
+        storageBucket: "scylla-ep.appspot.com",
+        messagingSenderId: "786465617342",
+        appId: "1:786465617342:web:728fbd76d10424c35435ef",
+        measurementId: "G-QDLSB393PJ"
+    };
+
+    firebase.initializeApp(firebaseConfig);
+    const db = firebase.firestore();
+
+    // Event listener dla przycisku "Kup Teraz"
+    document.getElementById('pay-now').addEventListener('click', function() {
+        // Pobieranie wartości z formularza
+        const name = document.getElementById('name').value.trim();
+        const email = document.getElementById('email').value.trim();
+        const phone = document.getElementById('phone').value.trim();
+        const paymentMethod = document.querySelector('input[name="payment_method"]:checked');
+        const shippingMethod = document.querySelector('input[name="shipping"]:checked');
+
+        // Resetowanie komunikatów o błędach
+        document.getElementById('name-error').textContent = '';
+        document.getElementById('email-error').textContent = '';
+        document.getElementById('payment-error').textContent = '';
+
+        // Walidacja
+        let valid = true;
+        if (!name) {
+            document.getElementById('name-error').textContent = 'Proszę wprowadzić swoje imię i nazwisko.';
+            valid = false;
+        }
+        if (!email) {
+            document.getElementById('email-error').textContent = 'Proszę wprowadzić adres e-mail.';
+            valid = false;
+        }
+        if (!paymentMethod) {
+            document.getElementById('payment-error').textContent = 'Proszę wybrać metodę płatności.';
+            valid = false;
+        }
+        if (!shippingMethod) {
+            document.getElementById('shipping-error').textContent = 'Proszę wybrać opcję dostawy.';
+            valid = false;
+        }
+
+        if (!valid) return; // Jeśli są błędy, nie wysyłaj formularza
+
+        // Zbieranie danych do zamówienia
+        const totalAmount = 29.99 + (shippingMethod.value === 'paczkomat' ? 11.99 : shippingMethod.value === 'kurier' ? 14.99 : 0);
+        const orderData = {
+            name: name,
+            email: email,
+            phone: phone,
+            payment_method: paymentMethod.value,
+            shipping_method: shippingMethod.value,
+            total_amount: totalAmount
         };
 
-        firebase.initializeApp(firebaseConfig);
-        const db = firebase.firestore();
-
-        // Event listener dla przycisku "Kup Teraz"
-        document.getElementById('pay-now').addEventListener('click', function() {
-            // Pobieranie wartości z formularza
-            const name = document.getElementById('name').value.trim();
-            const email = document.getElementById('email').value.trim();
-            const phone = document.getElementById('phone').value.trim();
-            const paymentMethod = document.querySelector('input[name="payment_method"]:checked');
-            const shippingMethod = document.querySelector('input[name="shipping"]:checked');
-
-            // Resetowanie komunikatów o błędach
-            document.getElementById('name-error').textContent = '';
-            document.getElementById('email-error').textContent = '';
-            document.getElementById('payment-error').textContent = '';
-
-            // Walidacja
-            let valid = true;
-            if (!name) {
-                document.getElementById('name-error').textContent = 'Proszę wprowadzić swoje imię i nazwisko.';
-                valid = false;
+        // Dodawanie zamówienia do Firestore
+        db.collection("orders").add(orderData)
+        .then(() => {
+            // Sprawdzanie metody płatności
+            if (paymentMethod.value === 'płatność przy odbiorze') {
+                // Płatność przy odbiorze - przekierowanie na stronę podziękowań
+                window.location.href = "podziękowania.html";
+            } else if (paymentMethod.value === 'paypal') {
+                // Płatność przez PayPal - przekierowanie do PayPal
+                handlePayPalPayment(totalAmount);
             }
-            if (!email) {
-                document.getElementById('email-error').textContent = 'Proszę wprowadzić adres e-mail.';
-                valid = false;
-            }
-            if (!paymentMethod) {
-                document.getElementById('payment-error').textContent = 'Proszę wybrać metodę płatności.';
-                valid = false;
-            }
-            if (!shippingMethod) {
-                document.getElementById('shipping-error').textContent = 'Proszę wybrać opcję dostawy.';
-                valid = false;
-            }
-
-            if (!valid) return; // Jeśli są błędy, nie wysyłaj formularza
-
-            // Zbieranie danych do zamówienia
-            const totalAmount = 29.99 + (shippingMethod.value === 'paczkomat' ? 11.99 : shippingMethod.value === 'kurier' ? 14.99 : 0);
-            const orderData = {
-                name: name,
-                email: email,
-                phone: phone,
-                payment_method: paymentMethod.value,
-                shipping_method: shippingMethod.value,
-                total_amount: totalAmount
-            };
-
-            // Dodawanie zamówienia do Firestore
-            db.collection("orders").add(orderData)
-            .then(() => {
-                // Przekierowanie na stronę podziękowań tylko przy płatności przy odbiorze
-                if (paymentMethod.value === 'płatność przy odbiorze') {
-                    window.location.href = "podziękowania.html";
-                }
-            })
-            .catch((error) => {
-                console.error("Błąd przy dodawaniu zamówienia: ", error);
-            });
+        })
+        .catch((error) => {
+            console.error("Błąd przy dodawaniu zamówienia: ", error);
         });
-    </script>
+    });
+
+    function handlePayPalPayment(totalAmount) {
+        paypal.Buttons({
+            createOrder: function(data, actions) {
+                return actions.order.create({
+                    purchase_units: [{
+                        amount: {
+                            value: totalAmount.toFixed(2)
+                        }
+                    }]
+                });
+            },
+            onApprove: function(data, actions) {
+                return actions.order.capture().then(function(details) {
+                    // Po pomyślnym zakończeniu płatności przekierowanie na stronę podziękowań
+                    window.location.href = "podziękowania.html";
+                });
+            },
+            onError: function(err) {
+                console.error('Błąd przy płatności PayPal:', err);
+            }
+        }).render('body'); // Renderowanie przycisku PayPal - to może być zmienione w zależności od struktury strony
+    }
+</script>
 </body>
 </html>
-
